@@ -76,4 +76,23 @@ impl Url {
         let path_and_serchpart: Vec<&str> = url_parts[1].splitn(2, "?").collect();
         path_and_serchpart[0].to_string()
     }
+
+    fn extract_searchpart(&self) -> String {
+        let url_parts: Vec<&str> = self
+        .url
+        .trim_start_matches("http://")
+        .splitn(2, "/")
+        .collect();
+
+        if url_parts.len() < 2 {
+            return "".to_string();
+        }
+
+        let path_and_serchpart: Vec<&str> = url_parts[1].splitn(2, "?").collect();
+        if path_and_serchpart.len() < 2 {
+            "".to_string()
+        } else {
+            path_and_serchpart[1].to_string()
+        }
+    }
 }
