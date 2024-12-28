@@ -24,7 +24,13 @@ impl Url {
         if !self.is_http() {
             return Err("Only HTTP schema is supported.".to_string());
         }
-        // TODO: Implement the parsing logic
+        
+        self.host = self.extract_host();
+        self.port = self.extract_port();
+        self.path = self.extract_path();
+        self.searchpart = self.extract_searchpart();
+
+        Ok(self.clone())
     }
 
     fn is_http(&self) -> bool {
@@ -37,7 +43,7 @@ impl Url {
     fn extract_host(&self) -> String {
         let url_parts: Vec<&str> = self
             .url
-            .trim_start_matches("http://")　
+            .trim_start_matches("http://")
             .splitn(2, "/")
             .collect();
 
