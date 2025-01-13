@@ -4,6 +4,7 @@ use alloc::format;
 use alloc::string::String;
 use noli::net::lookup_host;
 use noli::net::SocketAddr;
+use noli::net::TcpStream;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 
