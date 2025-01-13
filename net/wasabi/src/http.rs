@@ -49,5 +49,16 @@ impl HttpClient {
         request.push_str("Accept: text/html\n");
         request.push_str("Connection: close\n");
         request.push_str("\n");
+
+        let _byte_written = match stream.write(request.as_bytes()) {
+            Ok(bytes) => bytes,
+            Err(_) => {
+                return Err(Error::Network(
+                    "Failed to send a request to TCP stream".to_string(),
+                ));
+            }
+        };
+
+        
     }
 }
