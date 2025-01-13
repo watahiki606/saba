@@ -9,3 +9,7 @@ pub struct HttpResponse {
     headers: Vec<Header>,
     body: String,
 }
+
+pub fn new(name: String, value: String) -> Self {
+    Self { name, value }
+}
