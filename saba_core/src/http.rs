@@ -10,6 +10,6 @@ pub struct HttpResponse {
     body: String,
 }
 
-pub fn new(name: String, value: String) -> Self {
+pub fn new(name: String, value: String) -> Result<Self, Error> {
     Self { name, value }
 }
