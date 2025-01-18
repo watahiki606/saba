@@ -10,6 +10,14 @@ pub struct HttpResponse {
     body: String,
 }
 
-pub fn new(name: String, value: String) -> Result<Self, Error> {
-    Self { name, value }
+#[derive(Debug, Clone)]
+pub struct Header {
+    name: String,
+    value: String,
+}
+
+impl Header {
+    pub fn new(name: String, value: String) -> Self {
+        Self { name, value }
+    }
 }
