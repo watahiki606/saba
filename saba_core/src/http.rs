@@ -1,5 +1,6 @@
 use alloc::format;
 use alloc::string::String;
+use alloc::str::ToString;
 use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
@@ -39,6 +40,16 @@ impl HttpResponse {
             }
             None => (Vec::new(), remaining),
         };
+
+        let statuses: Vec<&str> = status_line.split( ' ').collect();
+
+        Ok(Self {
+            version: statuses[0].to_string(),
+            status_code: statuses[1].parse().unwrap_or(404),
+            reason: statuses[2].to_string(),
+            headers,
+            body: body.to_string(),
+        })
     }
 }
 
