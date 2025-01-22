@@ -60,7 +60,7 @@ impl HttpResponse {
             Some((h, b)) => {
                 let mut headers = Vec::new();
                 for header in h.split('\n') {
-                    let splitted_header: Vec<&str> = header.splitn(2, ' ').collect();
+                    let splitted_header: Vec<&str> = header.splitn(2, ':').collect();
                     headers.push(Header::new(
                         String::from(splitted_header[0].trim()),
                         String::from(splitted_header[1].trim()),
@@ -106,5 +106,15 @@ mod tests {
         assert_eq!(res.version(), "HTTP/1.1");
         assert_eq!(res.status_code(), 200);
         assert_eq!(res.reason(), "OK");
+    }
+
+    #[test]
+    fn test_one_header() {
+        let raw = "HTTP/1.1 200 OK\nDate:xx xx xx\n\n".to_string();
+        let res = HttpResponse::new(raw).expect("failed to parse http response");
+        assert_eq!(res.version(), "HTTP/1.1");
+        assert_eq!(res.status_code(), 200);
+        assert_eq!(res.reason(), "OK");
+        assert_eq!(res.header_value("Date"), Ok("xx xx xx".to_string()));
     }
 }
