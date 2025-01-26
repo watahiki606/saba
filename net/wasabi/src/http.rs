@@ -1,5 +1,5 @@
 extern crate alloc;
-use crate::alloc::string::ToString;
+use alloc::string::ToString;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -31,10 +31,10 @@ impl HttpClient {
             return Err(Error::Network("Failed to find IP addresses".to_string()));
         }
 
-        let socket_addr = SocketAddr::new(ips[0], port).into();
-        let mut stream = match TcpStream::connect(&socket_addr) {
+        let socket_addr: SocketAddr = (ips[0], port).into();
+        let mut stream = match TcpStream::connect(socket_addr) {
             Ok(stream) => stream,
-            Err(e) => {
+            Err(_) => {
                 return Err(Error::Network(
                     "Failed to connect to TCP stream".to_string(),
                 ));
@@ -80,7 +80,7 @@ impl HttpClient {
         }
 
         match core::str::from_utf8(&received) {
-            Ok(response) => Ok(HttpResponse::new(response.to_string())),
+            Ok(response) => HttpResponse::new(response.to_string()),
             Err(e) => Err(Error::Network(format!(
                 "Invalid received response: {}",
                 e
