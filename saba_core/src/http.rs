@@ -129,4 +129,16 @@ mod tests {
         assert_eq!(res.header_value("Date"), Ok("xx xx xx".to_string()));
         assert_eq!(res.header_value("Content-Length"), Ok("42".to_string()));
     }
+
+    #[test]
+    fn test_body() {
+        let raw = "HTTP/1.1 200 OK\nDate:xx xx xx\n\nbody message".to_string();
+        let res = HttpResponse::new(raw).expect("failed to parse http response");
+        assert_eq!(res.version(), "HTTP/1.1");
+        assert_eq!(res.status_code(), 200);
+        assert_eq!(res.reason(), "OK");
+        
+        assert_eq!(res.header_value("Date"), Ok("xx xx xx".to_string()));
+        assert_eq!(res.body(), "body message".to_string());
+    }
 }
