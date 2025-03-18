@@ -42,3 +42,24 @@ pub enum HtmlToken {
     // ファイルの終了(End Of File)
     Eof,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum State {
+    Data,
+    TagOpen,
+    EndTagOpen,
+    TagName,
+    BeforeAttributeName,
+    AttributeName,
+    AfterAttributeName,
+    BeforeAttributeValue,
+    AttributeValueDoubleQuoted,
+    AttributeValueSingleQuoted,
+    AttributeValueUnquoted,
+    AfterAttributeValueQuoted,
+    SelfClosingStartTag,
+    ScriptData,
+    ScriptDataLessThanSign,
+    ScriptDataEndTagOpen,
+    ScriptDataEndTagName,
+}
