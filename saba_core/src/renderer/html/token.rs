@@ -25,6 +25,23 @@ impl HtmlTokenizer {
     }
 }
 
+impl Iterator for HtmlTokenizer {
+    type Item = HtmlToken;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.input.len() {
+            return None;
+        }
+
+        loop {
+            match self.state {
+                State::Data => {}
+                _ => {}
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HtmlToken {
     // 開始タグ
