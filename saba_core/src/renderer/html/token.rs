@@ -13,6 +13,10 @@ pub struct HtmlTokenizer {
 }
 
 impl HtmlTokenizer {
+    fn is_eof(&self) -> bool {
+        self.pos > self.input.len()
+    }
+
     pub fn new(html: String) -> Self {
         Self {
             state: State::Data,
@@ -22,6 +26,12 @@ impl HtmlTokenizer {
             input: html.chars().collect(),
             buf: String::new(),
         }
+    }
+
+    fn consume_next_input(&mut self) -> char {
+        let c = self.input[self.pos];
+        self.pos += 1;
+        c
     }
 }
 
@@ -34,9 +44,20 @@ impl Iterator for HtmlTokenizer {
         }
 
         loop {
+            let c = self.consume_next_input();
+
             match self.state {
-                State::Data => {}
-                _ => {}
+                State::Data => {
+                    if c == '<' {
+                        self.state = State::TagOpen;
+                        continue;
+                    }
+
+                    if self.is_eof() {
+                        return Some(HtmlToken::Eof);
+                    }
+                    return Some(HtmlToken::Char(c));
+                }
             }
         }
     }
