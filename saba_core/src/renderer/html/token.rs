@@ -100,6 +100,19 @@ impl Iterator for HtmlTokenizer {
                     self.reconsume = true;
                     self.state = State::Data;
                 }
+                State::EndTagOpen => {
+                    if self.is_eof() {
+                        return Some(HtmlToken::Eof);
+                    }
+
+                    if c.is_ascii_alphabetic() {
+                        self.reconsume = true;
+                        self.state = State::TagName;
+                        self.create_tag(false);
+                        continue;
+                    }
+
+
             }
         }
     }
