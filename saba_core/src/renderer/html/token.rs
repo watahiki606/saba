@@ -93,6 +93,8 @@ impl HtmlTokenizer {
             }
         }
     }
+
+    // fn append_attribute(&mut self, c: char, is_name: bool) {
 }
 
 impl Iterator for HtmlTokenizer {
@@ -191,6 +193,26 @@ impl Iterator for HtmlTokenizer {
                     self.reconsume = true;
                     self.state = State::AttributeName;
                     self.start_new_attribute();
+                }
+
+                State::AttributeName => {
+                    if c == ' ' || c == '/' || c == '>' || self.is_eof() {
+                        self.reconsume = true;
+                        self.state = State::AfterAttributeName;
+                        continue;
+                    }
+
+                    if c == '=' {
+                        self.state = State::BeforeAttributeValue;
+                        continue;
+                    }
+
+                    if c.is_ascii_uppercase() {
+                        self.append_attribute(c.to_ascii_lowercase(), /*is_name*/ true);
+                        continue;
+                    }
+
+                    self.append_attribute(c, /*is_name*/ true);
                 }
             }
         }
