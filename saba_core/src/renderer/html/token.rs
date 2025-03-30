@@ -113,6 +113,21 @@ impl HtmlTokenizer {
             }
         }
     }
+
+    fn set_self_closing_flag(&mut self) {
+        assert!(self.latest_token.is_some());
+
+        if let Some(t) = self.latest_token.as_mut() {
+            match t {
+                HtmlToken::StartTag {
+                    tag: _,
+                    ref mut self_closing,
+                    attributes: _,
+                } => *self_closing = true,
+                _ => panic!("`latest_token` should be either StartTag"),
+            }
+        }
+    }
 }
 
 impl Iterator for HtmlTokenizer {
