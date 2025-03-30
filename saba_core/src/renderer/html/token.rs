@@ -390,6 +390,19 @@ impl Iterator for HtmlTokenizer {
 
                     return Some(HtmlToken::Char(c));
                 }
+
+                State::ScriptDataLessThanSign => {
+                    if c == '/' {
+                        // 一時的なバッファを空文字でリセットする
+                        self.buf = String::new();
+                        self.state = State::ScriptDataEndTagOpen;
+                        continue;
+                    }
+
+                    self.reconsume = true;
+                    self.state = State::ScriptData;
+                    return Some(HtmlToken::Char('<'));
+                }
             }
         }
     }
