@@ -349,6 +349,17 @@ impl Iterator for HtmlTokenizer {
                     self.state = State::BeforeAttributeValue;
                 }
 
+                State::SelfClosingStartTag => {
+                    if c == '>' {
+                        self.set_self_closing_flag();
+                        self.state = State::Data;
+                        return self.take_latest_token();
+                    }
+
+                    if self.is_eof() {
+                        // invalid parse error.
+                        return Some(HtmlToken::Eof); 
+                    }
                 
                 }
 
