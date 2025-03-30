@@ -112,6 +112,7 @@ impl HtmlTokenizer {
                 _ => panic!("`latest_token` should be either StartTag"),
             }
         }
+    }
 }
 
 impl Iterator for HtmlTokenizer {
@@ -276,7 +277,7 @@ impl Iterator for HtmlTokenizer {
                         self.state = State::AttributeValueSingleQuoted;
                         continue;
                     }
-                    
+
                     self.reconsume = true;
                     self.state = State::AttributeValueUnquoted;
                 }
@@ -330,7 +331,7 @@ impl Iterator for HtmlTokenizer {
                         self.state = State::BeforeAttributeName;
                         continue;
                     }
-                    
+
                     if c == '/' {
                         self.state = State::SelfClosingStartTag;
                         continue;
@@ -358,11 +359,9 @@ impl Iterator for HtmlTokenizer {
 
                     if self.is_eof() {
                         // invalid parse error.
-                        return Some(HtmlToken::Eof); 
+                        return Some(HtmlToken::Eof);
                     }
-                
                 }
-
             }
         }
     }
