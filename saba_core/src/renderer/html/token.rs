@@ -511,4 +511,23 @@ mod tests {
         let mut tokenizer = HtmlTokenizer::new(html);
         assert_eq!(tokenizer.next(), None);
     }
+
+    #[test]
+    fn test_start_and_end_tag() {
+        let html = "<body></body>".to_string();
+        let mut tokenizer = HtmlTokenizer::new(html);
+        let expected = [
+            HtmlToken::StartTag {
+                tag: "body".to_string(),
+                self_closing: false,
+                attributes: Vec::new(),
+            },
+            HtmlToken::EndTag {
+                tag: "body".to_string(),
+            },
+        ];
+        for e in expected {
+            assert_eq!(Some(e), tokenizer.next());
+        }
+    }
 }
