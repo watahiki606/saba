@@ -8,7 +8,7 @@ use core::cell::RefCell;
 #[derive(Debug, Clone)]
 pub struct HtmlParser {
     window: Rc<RefCell<Window>>,
-    node: InsertionMode,
+    mode: InsertionMode,
     original_insertion_mode: InsertionMode,
     stack_of_open_elements: Vec<Rc<RefCell<Node>>>,
     t: HtmlTokenizer,
@@ -18,11 +18,32 @@ impl HtmlParser {
     pub fn new(t: HtmlTokenizer) -> Self {
         Self {
             window: Rc::new(RefCell::new(Window::new())),
-            node: InsertionMode::Initial,
+            mode: InsertionMode::Initial,
             original_insertion_mode: InsertionMode::Initial,
             stack_of_open_elements: Vec::new(),
             t,
         }
+    }
+
+    pub fn construct_tree(&mut self) -> Rc<RefCell<Window>> {
+        let mut token = self.t.next();
+
+        while token.is_some() {
+            match self.mode {
+                InsertionMode::Initial => {
+                    // 文字トークンは無視する
+                    if let Some(HtmlToken::Character(_)) = token {
+                        token = self.t.next();
+                        continue;
+                    }
+
+                    self.mode = InsertionMode::BeforeHtml;
+                    continue;
+                }
+            }
+        }
+
+        self.window.clone()
     }
 }
 
