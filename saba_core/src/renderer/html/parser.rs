@@ -1,5 +1,6 @@
 use crate::renderer::dom::node::Node;
 use crate::renderer::dom::node::Window;
+use crate::renderer::html::token::HtmlToken;
 use crate::renderer::html::token::HtmlTokenizer;
 use alloc::rc::Rc;
 use alloc::vec::Vec;
@@ -32,7 +33,7 @@ impl HtmlParser {
             match self.mode {
                 InsertionMode::Initial => {
                     // 文字トークンは無視する
-                    if let Some(HtmlToken::Character(_)) = token {
+                    if let Some(HtmlToken::Char(_)) = token {
                         token = self.t.next();
                         continue;
                     }
@@ -40,9 +41,37 @@ impl HtmlParser {
                     self.mode = InsertionMode::BeforeHtml;
                     continue;
                 }
+                InsertionMode::BeforeHtml => {
+                    match token {
+                        Some(HtmlToken::Char(c)) => {
+                            if c == ' ' || c == '\n' {
+                                token = self.t.next();
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::StartTag {
+                            ref tag,
+                            self_closing: _,
+                            ref attributes,
+                        }) => {
+                            if tag == "html" {
+                                self.insert_element(tag, attributes.to_vec());
+                                self.mode = InsertionMode::BeforeHead;
+                                token = self.t.next();
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::Eof) | None => {
+                            return self.window.clone();
+                        }
+                        _ => {}
+                    }
+                    self.insert_element("html", Vec::new());
+                    self.mode = InsertionMode::BeforeHead;
+                    continue;
+                }
             }
         }
-
         self.window.clone()
     }
 }
