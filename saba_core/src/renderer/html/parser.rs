@@ -98,6 +98,55 @@ impl HtmlParser {
                     self.insert_element("head", Vec::new());
                     self.mode = InsertionMode::InHead;
                     continue;
+                }
+                InsertionMode::InHead => {
+                    match token {
+                        Some(HtmlToken::Char(c)) => {
+                            if c == ' ' || c == '\n' {
+                                self.insert_char(c);
+                                token = self.t.next();
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::StartTag {
+                            ref tag,
+                            self_closing: _,
+                            ref attributes,
+                        }) => {
+                            if tag == "style" || tag == "script" {
+                                self.insert_element(tag, attributes.to_vec());
+                                self.original_insertion_mode = self.mode;
+                                self.mode = InsertionMode::Text;
+                                token = self.t.next();
+                                continue;
+                            }
+                            if tag == "body" {
+                                self.pop_until(ElementKind::Head);
+                                self.mode = InsertionMode::AfterHead;
+                                continue;
+                            }
+                            if let Ok(_element_kind) = ElementKind::from_str(tag) {
+                                self.pop_until(ElementKind::Head);
+                                self.mode = InsertionMode::AfterHead;
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::EndTag { ref tag }) => {
+                            if tag == "head" {
+                                self.mode = InsertionMode::AfterHead;
+                                token = self.t.next();
+                                self..pop_until(ElementKind::Head);
+                                continue;
+                            }
+                        }
+                        Some(HtmlToken::Eof) | None => {
+                            return self.window.clone();
+                        }
+                    }
+                    // <meta> や <title> などのサポートしていないタグは無視する
+                    token = self.t.next();
+                    continue;
+                }
             }
         }
         self.window.clone()
