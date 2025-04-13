@@ -1,5 +1,8 @@
+use crate::renderer::dom::node::Element;
 use crate::renderer::dom::node::Node;
+use crate::renderer::dom::node::NodeKind;
 use crate::renderer::dom::node::Window;
+use crate::renderer::html::attribute::Attribute;
 use crate::renderer::html::token::HtmlToken;
 use crate::renderer::html::token::HtmlTokenizer;
 use alloc::rc::Rc;
@@ -278,6 +281,10 @@ impl HtmlParser {
             }
         }
         self.window.clone()
+    }
+
+    fn create_element(&self, tag: &str, attributes: Vec<Attribute>) -> Node {
+        Node::new(NodeKind::Element(Element::new(tag, attributes)))
     }
 }
 
