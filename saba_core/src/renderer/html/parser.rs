@@ -10,6 +10,7 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::cell::RefCell;
+use core::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub struct HtmlParser {
@@ -140,7 +141,7 @@ impl HtmlParser {
                             if tag == "head" {
                                 self.mode = InsertionMode::AfterHead;
                                 token = self.t.next();
-                                self..pop_until(ElementKind::Head);
+                                self.pop_until(ElementKind::Head);
                                 continue;
                             }
                         }
@@ -437,7 +438,7 @@ impl HtmlParser {
         };
 
         // 現在参照しているノードがテキストノードの場合、そのノードに文字を追加する
-        if let NodeKind::Text(ref mut s) = current.borrow().kind {
+        if let NodeKind::Text(ref mut s) = current.borrow_mut().kind {
             s.push(c);
             return;
         }
@@ -484,4 +485,19 @@ pub enum InsertionMode {
     Text,
     AfterBody,
     AfterAfterBody,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::alloc::string::ToString;
+
+    #[test]
+    fn test_empty() {
+        let html = "".to_string();
+        let t = HtmlTokenizer::new(html);
+        let window = HtmlParser::new(t).construct_tree();
+        let expected = Rc::new(RefCell::new(Node::new(NodeKind::Document)));
+        assert_eq!(expected, window.borrow().document());
+    }
 }
