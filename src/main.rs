@@ -29,7 +29,7 @@ Data: xx xx xx
 "#;
 
 fn main() -> u64 {
-    let client = HttpClient::new();
+    let browser = Browser::new();
 
     let response =
         HttpResponse::new(TEST_HTTP_RESPONSE.to_string()).expect("failed to parse http response");
