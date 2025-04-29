@@ -29,6 +29,24 @@ impl CssTokenizer {
             input: input.chars().collect(),
         }
     }
+
+    fn consume_string_token(&mut self) -> String {
+        let mut s = String::new();
+
+        loop {
+            if self.pos >= self.input.len() {
+                return s;
+            }
+            self.pos += 1;
+            let c = self.input[self.pos];
+            match c {
+                '"' | '\'' => break,
+
+                _ => s.push(c),
+            }
+        }
+        s
+    }
 }
 
 impl Iterator for CssTokenizer {
@@ -42,7 +60,25 @@ impl Iterator for CssTokenizer {
             let c = self.input[self.pos];
 
             let token = match c {
-                // 次のトークンを決定する
+                '(' => CssToken::OpenParenthesis,
+                ')' => CssToken::CloseParenthesis,
+                ',' => CssToken::Delim(','),
+                '.' => CssToken::Delim('.'),
+                ':' => CssToken::Colon,
+                ';' => CssToken::SemiColon,
+                '{' => CssToken::OpenCurly,
+                '}' => CssToken::CloseCurly,
+                ' ' | '\n' => {
+                    self.pos += 1;
+                    continue;
+                }
+                '"' | '\'' => {
+                    let value = self.consume_string_token();
+                    CssToken::StringToken(value)
+                }
+                _ => {
+                    unimplemented!("char {} is not supported yet", c);
+                }
             };
 
             self.pos += 1;
