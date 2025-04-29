@@ -171,3 +171,16 @@ impl Iterator for CssTokenizer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloc::string::ToString;
+
+    #[test]
+    fn test_empty() {
+        let style = "".to_string();
+        let mut t = CssTokenizer::new(style);
+        assert!(t.next().is_none());
+    }
+}
