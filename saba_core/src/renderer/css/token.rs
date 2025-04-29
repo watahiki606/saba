@@ -111,6 +111,39 @@ impl Iterator for CssTokenizer {
                     self.pos += 1;
                     t
                 }
+                '#' => {
+                    // 常に #ID の形式の ID セレクタとして扱う。
+                    let value = self.consume_ident_token();
+                    self.pos -= 1;
+                    CssToken::HashToken(value)
+                }
+                '-' => {
+                    // 負の数は取り扱わないため、- は識別子の一つとして扱う。
+                    let t = CssToken::Ident(self.consume_ident_token());
+                    self.pos -= 1;
+                    t
+                }
+                '@' => {
+                    // 次の 3 文字が識別子として有効な文字の場合、<at-keyword-token> トークンを作成して返す。
+                    // それ以外の場合、<delim-token> を返す。
+                    if self.input[self.pos + 1].is_ascii_alphabetic()
+                        && self.input[self.pos + 2].is_alphanumeric()
+                        && self.input[self.pos + 3].is_alphanumeric()
+                    {
+                        // skip '@'
+                        self.pos += 1;
+                        let t = CssToken::AtKeyword(self.consume_ident_token());
+                        self.pos -= 1;
+                        t
+                    } else {
+                        CssToken::Delim('@')
+                    }
+                }
+                'a'..='z' | 'A'..='Z' | '_' => {
+                    let t = CssToken::Ident(self.consume_ident_token());
+                    self.pos -= 1;
+                    t
+                }
                 _ => {
                     unimplemented!("char {} is not supported yet", c);
                 }
