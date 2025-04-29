@@ -77,6 +77,23 @@ impl CssTokenizer {
         }
         num
     }
+
+    fn consume_ident_token(&mut self) -> String {
+        let mut s = String::new();
+        s.push(self.input[self.pos]);
+
+        loop {
+            self.pos += 1;
+            let c = self.input[self.pos];
+            match c {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' => {
+                    s.push(c);
+                }
+                _ => break,
+            }
+        }
+        s
+    }
 }
 
 impl Iterator for CssTokenizer {
