@@ -30,3 +30,23 @@ impl CssTokenizer {
         }
     }
 }
+
+impl Iterator for CssTokenizer {
+    type Item = CssToken;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.pos >= self.input.len() {
+                return None;
+            }
+            let c = self.input[self.pos];
+
+            let token = match c {
+                // 次のトークンを決定する
+            };
+
+            self.pos += 1;
+            return Some(token);
+        }
+    }
+}
