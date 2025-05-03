@@ -31,6 +31,13 @@ impl QualifiedRule {
     }
 }
 
+pub enum Selector {
+    TypeSelector(String),
+    ClassSelector(String),
+    IdSelector(String),
+    UnknownSelector,
+}
+
 impl StyleSheet {
     pub fn new() -> Self {
         Self { rules: Vec::new() }
