@@ -1,4 +1,5 @@
 use crate::alloc::string::ToString;
+use crate::renderer::css::token::CssToken;
 use crate::renderer::css::token::CssTokenizer;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -61,6 +62,8 @@ impl Declaration {
         self.value = value;
     }
 }
+
+pub type ComponentValue = CssToken;
 
 impl StyleSheet {
     pub fn new() -> Self {
