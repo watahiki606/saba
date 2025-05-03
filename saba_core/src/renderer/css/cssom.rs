@@ -1,5 +1,6 @@
 use crate::alloc::string::ToString;
 use crate::renderer::css::token::CssTokenizer;
+use alloc::string::String;
 use alloc::vec::Vec;
 use core::iter::Peekable;
 
@@ -36,6 +37,29 @@ pub enum Selector {
     ClassSelector(String),
     IdSelector(String),
     UnknownSelector,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Declaration {
+    pub property: String,
+    pub value: ComponentValue,
+}
+
+impl Declaration {
+    pub fn new() -> Self {
+        Self {
+            property: String::new(),
+            value: ComponentValue::Ident(String::new()),
+        }
+    }
+
+    pub fn set_property(&mut self, property: String) {
+        self.property = property;
+    }
+
+    pub fn set_value(&mut self, value: ComponentValue) {
+        self.value = value;
+    }
 }
 
 impl StyleSheet {
