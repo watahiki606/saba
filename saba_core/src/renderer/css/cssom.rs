@@ -84,4 +84,13 @@ impl CssParser {
     pub fn new(t: CssTokenizer) -> Self {
         Self { t: t.peekable() }
     }
+
+    pub fn parse_stylesheet(&mut self) -> StyleSheet {
+        // StyleSheet 構造体のインスタンスを作成
+        let mut sheet = StyleSheet::new();
+
+        // トークン列からルールのリストを作成し、StyleSheet のフィールドに設定
+        sheet.set_rules(self.consume_list_of_rules());
+        sheet
+    }
 }
