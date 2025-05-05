@@ -236,4 +236,18 @@ impl CssParser {
 
         Some(declaration)
     }
+
+    fn consume_ident(&mut self) -> String {
+        let token = match self.t.next() {
+            Some(t) => t,
+            None => panic!("should have a token but got None"),
+        };
+
+        match token {
+            CssToken::Ident(ident) => ident.to_string(),
+            _ => {
+                panic!("Parse error: {:?} is an unexpected token.", token);
+            }
+        }
+    }
 }
