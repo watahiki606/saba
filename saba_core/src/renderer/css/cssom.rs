@@ -212,4 +212,28 @@ impl CssParser {
             }
         }
     }
+
+    fn consume_declaration(&mut self) -> Option<Declaration> {
+        if self.t.peek().is_none() {
+            return None;
+        }
+
+        // Declaration 構造体を初期化する
+        let mut declaration = Declaration::new();
+        // Declaration 構造体のプロパティに識別子を設定する
+        declaration.set_property(self.consume_ident());
+        // もし次のトークンが転んでない場合、パースエラーなので、None を返す
+        match self.t.next() {
+            Some(token) => match token {
+                CssToken::Colon => {}
+                _ => return None,
+            },
+            None => return None,
+        }
+
+        // Declaration 構造体の値にコンポーネント値を設定する
+        declaration.set_value(self.consume_component_value());
+
+        Some(declaration)
+    }
 }
