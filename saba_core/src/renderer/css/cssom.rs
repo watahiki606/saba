@@ -93,4 +93,33 @@ impl CssParser {
         sheet.set_rules(self.consume_list_of_rules());
         sheet
     }
+
+    fn consume_list_of_rules(&mut self) -> Vec<QualifiedRule> {
+        // 空のベクタを作成
+        let mut rules = Vec::new();
+
+        loop {
+            let token = match self.t.peek() {
+                Some(t) => t,
+                None => return rules,
+            };
+
+            match token {
+                // AtKeyword トークンが出てくた場合、ほかの CSS をインポートする
+                // @import 、メディアクエリを表す @media などのルールが始まることを表す
+                CssToken::AtKeyword(_keyword) => {
+                    let _rule = self.consume_qualified_rule();
+                    // しかし、本書のブラウザでは @ から始まるルールはサポートしないので、無視する
+                }
+                _ => {
+                    // １つのるーる　を解釈し、ベクタに追加する
+                    let rule = self.consume_qualified_rule();
+                    match rule {
+                        Some(r) => rules.push(r),
+                        None => return rules,
+                    }
+                }
+            }
+        }
+    }
 }
