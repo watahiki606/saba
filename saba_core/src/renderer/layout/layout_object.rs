@@ -17,6 +17,13 @@ pub struct LayoutObject {
     size: LayoutSize,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum LayoutObjectKind {
+    Block,
+    Inline,
+    Text,
+}
+
 impl LayoutObject {
     pub fn new(node: Rc<RefCell<Node>>, parent_obj: &Option<Rc<RefCell<LayoutObject>>>) -> Self {
         let parent = match parent_obj {
