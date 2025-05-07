@@ -45,6 +45,34 @@ impl LayoutPoint {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct LayoutSize {
+    width: i64,
+    height: i64,
+}
+
+impl LayoutSize {
+    pub fn new(width: i64, height: i64) -> Self {
+        Self { width, height }
+    }
+
+    pub fn width(&self) -> i64 {
+        self.width
+    }
+
+    pub fn height(&self) -> i64 {
+        self.height
+    }
+
+    pub fn set_width(&mut self, width: i64) {
+        self.width = width;
+    }
+
+    pub fn set_height(&mut self, height: i64) {
+        self.height = height;
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum LayoutObjectKind {
     Block,
