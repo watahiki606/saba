@@ -208,3 +208,38 @@ impl FontSize {
         }
     }
 }
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum DisplayType {
+    Block,
+    Inline,
+    DisplayNone,
+}
+
+impl DisplayType {
+    fn default(node: &Rc<RefCell<Node>>) -> Self {
+        match &node.borrow().kind() {
+            NodeKind::Document => DisplayType::Block,
+            NodeKind::Element(e) => {
+                if e.is_block_element() {
+                    DisplayType::Block
+                } else {
+                    DisplayType::Inline
+                }
+            }
+            NodeKind::Text(_) => DisplayType::Inline,
+        }
+    }
+
+    pub fn from_str(s: &str) -> Result<Self, Error> {
+        match s {
+            "block" => Ok(DisplayType::Block),
+            "inline" => Ok(DisplayType::Inline),
+            "none" => Ok(DisplayType::DisplayNone),
+            _ => Err(Error::UnexpectedInput(format!(
+                "display {:?} is not supported yet",
+                s
+            ))),
+        }
+    }
+}
