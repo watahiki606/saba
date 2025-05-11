@@ -1,4 +1,4 @@
-use alloc::error::Error;
+use crate::error::Error;
 use alloc::format;
 use alloc::string::String;
 use alloc::string::ToString;
@@ -117,17 +117,19 @@ impl Color {
             "orange" => "#ffa500".to_string(),
             "lightgray" => "#d3d3d3".to_string(),
             _ => {
-                return Err(Error::Unexpectedinput(format!(
+                return Err(Error::UnexpectedInput(format!(
                     "color name {:?} is not supported yet",
                     name
                 )));
             }
         };
+
+        Ok(Self { name: Some(name.to_string()),  code })
     }
 
     fn from_code(code: &str) -> Result<Self, Error> {
         if code.chars().nth(0) != Some('#') || code.len() != 7 {
-            return Err(Error::Unexpectedinput(format!(
+            return Err(Error::UnexpectedInput(format!(
                 "invalid color code {}",
                 code
             )));
@@ -153,7 +155,7 @@ impl Color {
             "#ffa500" => "orange".to_string(),
             "#d3d3d3" => "lightgray".to_string(),
             _ => {
-                return Err(Error::Unexpectedinput(format!(
+                return Err(Error::UnexpectedInput(format!(
                     "color code {:?} is not supported yet",
                     code
                 )));
@@ -188,21 +190,21 @@ impl Color {
 }
 
 #[derive(Debug,Copy, Clone, PartialEq)]
-    pub enum FontSize {
+pub enum FontSize {
         Medium,
         XLarge,
         XXLarge,
-    }
+}
 
-    impl FontSize {
-        fn default(node: &Rc<RefCell<Node>>) -> Self {
-            match &node.borrow().kind() {
-                NodeKind::Element(element) => match element.kind() {
-                    ElementKind::H1 => FontSize::XXLarge,
-                    ElementKind::H2 => FontSize::XLarge,
-                    _ => FontSize::Medium,
-                }
+impl FontSize {
+    fn default(node: &Rc<RefCell<Node>>) -> Self {
+        match &node.borrow().kind() {
+            NodeKind::Element(element) => match element.kind() {
+                ElementKind::H1 => FontSize::XXLarge,
+                ElementKind::H2 => FontSize::XLarge,
                 _ => FontSize::Medium,
             }
+            _ => FontSize::Medium,
         }
     }
+}
