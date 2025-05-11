@@ -1,13 +1,12 @@
 use crate::error::Error;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
 use crate::renderer::dom::node::ElementKind;
 use crate::renderer::dom::node::Node;
-use crate::renderer::dom::node::NodeKind
+use crate::renderer::dom::node::NodeKind;
+use alloc::format;
 use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::string::ToString;
 use core::cell::RefCell;
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ComputedStyle {
@@ -124,7 +123,10 @@ impl Color {
             }
         };
 
-        Ok(Self { name: Some(name.to_string()),  code })
+        Ok(Self {
+            name: Some(name.to_string()),
+            code,
+        })
     }
 
     fn from_code(code: &str) -> Result<Self, Error> {
@@ -185,15 +187,13 @@ impl Color {
     pub fn code_u32(&self) -> u32 {
         u32::from_str_radix(self.code.trim_start_matches('#'), 16).unwrap()
     }
-
-    
 }
 
-#[derive(Debug,Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum FontSize {
-        Medium,
-        XLarge,
-        XXLarge,
+    Medium,
+    XLarge,
+    XXLarge,
 }
 
 impl FontSize {
@@ -203,7 +203,7 @@ impl FontSize {
                 ElementKind::H1 => FontSize::XXLarge,
                 ElementKind::H2 => FontSize::XLarge,
                 _ => FontSize::Medium,
-            }
+            },
             _ => FontSize::Medium,
         }
     }
