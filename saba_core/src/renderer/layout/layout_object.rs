@@ -1,3 +1,5 @@
+use crate::alloc::string::ToString;
+use crate::renderer::css::cssom::Selector;
 use crate::renderer::css::cssom::StyleSheet;
 use crate::renderer::dom::node::Node;
 use crate::renderer::dom::node::NodeKind;
@@ -139,6 +141,36 @@ impl LayoutObject {
     pub fn size(&self) -> &LayoutSize {
         &self.size.clone()
     }
+
+    pub fn is_node_selected(&self, selector: &Selector) -> bool {
+        match &self.node_kind() {
+            NodeKind::Element(e) => match selector {
+                Selector::TypeSelector(type_name)=> {
+                if e.kind().to_string() == *type_name {
+                    return true;
+                }
+                false
+            }
+            Selector::ClassSelector(class_name) => {
+                for attr in &e.attributes() {
+                    if attr.name() == "class" && attr.value() == *class_name {
+                        return true;
+                    }
+                }
+                false
+            }
+            Selector::IdSelector(id_name) => {
+                for attr in &e.attributes() {
+                    if attr.name() == "id" &&  attr.value() == *id_name {
+                        return true;
+                    }
+                }
+                false
+            }
+            Selector::UnknownSelector => false,
+        },
+        _=> false,
+    }
 }
 
 pub fn create_layout_object(
@@ -167,6 +199,11 @@ pub fn create_layout_object(
         };
 
         layout_object.borrow_mut().defaulting_style(n, parent_style);
+
+        // display プロパティが none の場合、レイアウトオブジェクトを作成しない
+        if layout_object.borrow().style().display() == DisplayType::None {
+            return None;
+        }
 
         // display プロパティの最終的な値を使用してノードの種類を決定する
         layout_object.borrow_mut().update_kind();

@@ -184,6 +184,10 @@ impl Element {
             _ => false,
         }
     }
+
+    pub fn attributes(&self) -> &Vec<Attribute> {
+        &self.attributes.clone()
+    }
 }
 
 impl FromStr for ElementKind {
