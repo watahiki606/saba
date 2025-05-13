@@ -1,12 +1,16 @@
 use crate::alloc::string::ToString;
+use crate::renderer::css::cssom::ComponentValue;
+use crate::renderer::css::cssom::Declaration;
 use crate::renderer::css::cssom::Selector;
 use crate::renderer::css::cssom::StyleSheet;
 use crate::renderer::dom::node::Node;
 use crate::renderer::dom::node::NodeKind;
+use crate::renderer::layout::computed_style::Color;
 use crate::renderer::layout::computed_style::ComputedStyle;
 use crate::renderer::layout::computed_style::DisplayType;
 use alloc::rc::Rc;
 use alloc::rc::Weak;
+use alloc::vec::Vec;
 use core::cell::RefCell;
 
 #[derive(Debug, Clone)]
@@ -145,69 +149,123 @@ impl LayoutObject {
     pub fn is_node_selected(&self, selector: &Selector) -> bool {
         match &self.node_kind() {
             NodeKind::Element(e) => match selector {
-                Selector::TypeSelector(type_name)=> {
-                if e.kind().to_string() == *type_name {
-                    return true;
-                }
-                false
-            }
-            Selector::ClassSelector(class_name) => {
-                for attr in &e.attributes() {
-                    if attr.name() == "class" && attr.value() == *class_name {
+                Selector::TypeSelector(type_name) => {
+                    if e.kind().to_string() == *type_name {
                         return true;
                     }
+                    false
                 }
-                false
+                Selector::ClassSelector(class_name) => {
+                    for attr in &e.attributes() {
+                        if attr.name() == "class" && attr.value() == *class_name {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                Selector::IdSelector(id_name) => {
+                    for attr in &e.attributes() {
+                        if attr.name() == "id" && attr.value() == *id_name {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                Selector::UnknownSelector => false,
+            },
+            _ => false,
+        }
+    }
+
+    pub fn create_layout_object(
+        node: &Option<Rc<RefCell<Node>>>,
+        parent_obj: &Option<Rc<RefCell<LayoutObject>>>,
+        cssom: &StyleSheet,
+    ) -> Option<Rc<RefCell<LayoutObject>>> {
+        if let Some(n) = node {
+            // LayoutObject を作成する
+            let layout_object = Rc::new(RefCell::new(LayoutObject::new(n.clone(), parent_obj)));
+
+            // CSS のルールをセレクタで選択されたノードに適用する
+            for rule in &cssom.rules {
+                if layout_object.borrow().is_node_selected(&rule.selector) {
+                    layout_object
+                        .borrow_mut()
+                        .cascading_style(rule.declarations.clone());
+                }
             }
-            Selector::IdSelector(id_name) => {
-                for attr in &e.attributes() {
-                    if attr.name() == "id" &&  attr.value() == *id_name {
-                        return true;
+
+            // CSS でスタイルが指定されていない場合、デフォルトの値または親のノードから継承した値を使用する
+            let parent_style = if let Some(parent) = parent_obj {
+                Some(parent.borrow().style())
+            } else {
+                None
+            };
+
+            layout_object.borrow_mut().defaulting_style(n, parent_style);
+
+            // display プロパティが none の場合、ノードを作成しない
+            if layout_object.borrow().style().display() == DisplayType::DisplayNone {
+                return None;
+            }
+
+            // display プロパティの最終的な値を使用してノードの種類を決定する
+            layout_object.borrow_mut().update_kind();
+            return Some(layout_object);
+        }
+        None
+    }
+
+    pub fn cascading_style(&mut self, declarations: Vec<Declaration>) {
+        for declaration in declarations {
+            match declaration.property.as_str() {
+                "background-color" => {
+                    if let ComponentValue::Ident(value) = &declaration.value {
+                        let color = match Color::from_name(&value) {
+                            Ok(color) => color,
+                            Err(_) => Color::white(),
+                        };
+                        self.style.set_background_color(color);
+                        continue;
+                    }
+                    if let ComponentValue::HashToken(color_code) = &declaration.value {
+                        let color = match Color::from_code(&color_code) {
+                            Ok(color) => color,
+                            Err(_) => Color::white(),
+                        };
+                        self.style.set_background_color(color);
+                        continue;
                     }
                 }
-                false
-            }
-            Selector::UnknownSelector => false,
-        },
-        _=> false,
-    }
-}
+                "color" => {
+                    if let ComponentValue::Ident(value) = &declaration.value {
+                        let color = match Color::from_name(&value) {
+                            Ok(color) => color,
+                            Err(_) => Color::black(),
+                        };
+                        self.style.set_color(color);
+                    }
 
-pub fn create_layout_object(
-    node: &Option<Rc<RefCell<Node>>>,
-    parent_obj: &Option<Rc<RefCell<LayoutObject>>>,
-    cssom: &StyleSheet,
-) -> Option<Rc<RefCell<LayoutObject>>> {
-    if let Some(n) = node {
-        // LayoutObject を作成する
-        let layout_object = Rc::new(RefCell::new(LayoutObject::new(n.clone(), parent_obj)));
+                    if let ComponentValue::HashToken(color_code) = &declaration.value {
+                        let color = match Color::from_code(&color_code) {
+                            Ok(color) => color,
+                            Err(_) => Color::black(),
+                        };
+                        self.style.set_color(color);
+                    }
+                }
+                "display" => {
+                    if let ComponentValue::Ident(value) = &declaration.value {
+                        let display_type = match DisplayType::from_str(&value) {
+                            Ok(display_type) => display_type,
+                            Err(_) => DisplayType::DisplayNone,
+                        };
+                        self.style.set_display(display_type);
+                    }
+                }
 
-        // CSS のルールをセレクタで選択されたノードに適用する
-        for rule in &cssom.rules {
-            if layout_object.borrow().is_node_selected(&rule.selector) {
-                layout_object
-                    .borrow_mut()
-                    .cascading_style(rule.declarations.clone());
+                _ => {}
             }
         }
-
-        // CSS でスタイルが指定されていない場合、デフォルトの値または親のノードから継承した値を使用する
-        let parent_style = if let Some(parent) = parent_obj {
-            Some(parent.borrow().style())
-        } else {
-            None
-        };
-
-        layout_object.borrow_mut().defaulting_style(n, parent_style);
-
-        // display プロパティが none の場合、レイアウトオブジェクトを作成しない
-        if layout_object.borrow().style().display() == DisplayType::None {
-            return None;
-        }
-
-        // display プロパティの最終的な値を使用してノードの種類を決定する
-        layout_object.borrow_mut().update_kind();
-        return Some(layout_object);
     }
-    None
 }
