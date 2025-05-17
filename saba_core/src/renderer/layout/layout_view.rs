@@ -5,6 +5,7 @@ use crate::renderer::dom::node::ElementKind;
 use crate::renderer::dom::node::Node;
 use crate::renderer::layout::layout_object::create_layout_object;
 use crate::renderer::layout::layout_object::LayoutObject;
+use crate::renderer::layout::layout_object::LayoutObjectKind;
 use crate::renderer::layout::layout_object::LayoutPoint;
 use crate::renderer::layout::layout_object::LayoutSize;
 use alloc::rc::Rc;
@@ -35,7 +36,7 @@ impl LayoutView {
     }
 
     pub fn update_layout(&mut self) {
-        Self::caluculate_node_size(&self.root, LayoutSize::new(CONTENT_AREA_WIDTH, 0));
+        Self::calculate_node_size(&self.root, LayoutSize::new(CONTENT_AREA_WIDTH, 0));
 
         Self::calculate_node_position(
             &self.root,
@@ -44,6 +45,34 @@ impl LayoutView {
             None,
             None,
         );
+    }
+
+    /// レイアウトツリーの各ノードのサイズを計算する
+    ///
+    /// * `node` - 計算対象のノード
+    /// * `parent_size` - 親ノードのサイズ
+    ///
+    fn calculate_node_size(node: &Option<Rc<RefCell<LayoutObject>>>, parent_size: LayoutSize) {
+        if let Some(n) = node {
+            // ノードがブロック要素の場合、子ノードのレイアウトを計算する前に現在のノードの横幅を決める
+            if n.borrow().kind() == LayoutObjectKind::Block {
+                n.borrow_mut().compute_size(parent_size);
+            }
+
+            // 子ノードと兄弟ノードのサイズを再帰的に計算する
+            let first_child = n.borrow().first_child();
+            // １回目の calculate_node_size の呼び出しでは、親のノードサイズによって横幅を決定する。ブロック要素は親の横幅いっぱいまで広がるため、親ノードの横幅と同等になる
+            Self::calculate_node_size(&first_child, n.borrow().size());
+
+            let next_sibling = n.borrow().next_sibling();
+            // 2回目の calculate_node_size の呼び出しでは、子要素のサイズが決定したあとなので、子要素のサイズをもとに高さを決定する。インライン要素の場合は、高さも横幅も子ノードのサイズに依存する。
+            Self::calculate_node_size(&next_sibling, parent_size);
+
+            // 子ノードのサイズが決まったあとにサイズを計算する
+            // ブロック要素の時、高さは子ノードの高さに依存する
+            // インライン要素のとき、高さも横幅も子ノードに依存する
+            n.borrow_mut().compute_size(parent_size);
+        }
     }
 }
 
