@@ -185,8 +185,8 @@ impl Element {
         }
     }
 
-    pub fn attributes(&self) -> &Vec<Attribute> {
-        &self.attributes.clone()
+    pub fn attributes(&self) -> Vec<Attribute> {
+        self.attributes.clone()
     }
 }
 

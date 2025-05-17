@@ -1,4 +1,7 @@
 use crate::alloc::string::ToString;
+use crate::constants::CHAR_HEIGHT_WITH_PADDING;
+use crate::constants::CHAR_WIDTH;
+use crate::constants::CONTENT_AREA_WIDTH;
 use crate::renderer::css::cssom::ComponentValue;
 use crate::renderer::css::cssom::Declaration;
 use crate::renderer::css::cssom::Selector;
@@ -8,6 +11,7 @@ use crate::renderer::dom::node::NodeKind;
 use crate::renderer::layout::computed_style::Color;
 use crate::renderer::layout::computed_style::ComputedStyle;
 use crate::renderer::layout::computed_style::DisplayType;
+use crate::renderer::layout::computed_style::FontSize;
 use alloc::rc::Rc;
 use alloc::rc::Weak;
 use alloc::vec::Vec;
@@ -15,7 +19,7 @@ use core::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub struct LayoutObject {
-    pub kind: LayoutObjectKind,
+    kind: LayoutObjectKind,
     node: Rc<RefCell<Node>>,
     first_child: Option<Rc<RefCell<LayoutObject>>>,
     next_sibling: Option<Rc<RefCell<LayoutObject>>>,
@@ -91,7 +95,7 @@ pub enum LayoutObjectKind {
 impl LayoutObject {
     pub fn new(node: Rc<RefCell<Node>>, parent_obj: &Option<Rc<RefCell<LayoutObject>>>) -> Self {
         let parent = match parent_obj {
-            Some(p) => Some(Rc::downgrade(p)),
+            Some(p) => Rc::downgrade(p),
             None => Weak::new(),
         };
         Self {

@@ -173,7 +173,7 @@ impl Color {
         })
     }
 
-    fn from_code(code: &str) -> Result<Self, Error> {
+    pub fn from_code(code: &str) -> Result<Self, Error> {
         if code.chars().nth(0) != Some('#') || code.len() != 7 {
             return Err(Error::UnexpectedInput(format!(
                 "invalid color code {}",
