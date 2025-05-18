@@ -74,6 +74,51 @@ impl LayoutView {
             n.borrow_mut().compute_size(parent_size);
         }
     }
+
+    /// レイアウトツリーの各ノードの位置を計算する.
+    /// compute_position メソッドを呼んで現在のノードの位置を計算したあとに、calculate_node_position 関数を子ノードと兄弟ノードに対して再帰的に呼び出すことでほかのノードの位置を計算する.
+    ///
+    /// * `node` - 計算対象のノード
+    /// * `parent_point` - 親ノードの位置
+    /// * `previous_sibling_kind` - 自分より前の兄弟ノードの種類
+    /// * `previous_sibling_point` - 自分より前の兄弟ノードの位置
+    /// * `previous_sibling_size` - 自分より前の兄弟ノードのサイズ
+    fn calculate_node_position(
+        node: &Option<Rc<RefCell<LayoutObject>>>,
+        parent_point: LayoutPoint,
+        previous_sibling_kind: LayoutObjectKind,
+        previous_sibling_point: Option<LayoutPoint>,
+        previous_sibling_size: Option<LayoutSize>,
+    ) {
+        if let Some(n) = node {
+            n.borrow_mut().compute_position(
+                parent_point,
+                previous_sibling_kind,
+                previous_sibling_point,
+                previous_sibling_size,
+            );
+
+            // ノードの子ノードの位置を計算する
+            let first_child = n.borrow().first_child();
+            Self::calculate_node_position(
+                &first_child,
+                n.borrow().point(),
+                LayoutObjectKind::Block,
+                None,
+                None,
+            );
+
+            // ノードの兄弟ノードの位置を計算する
+            let next_sibling = n.borrow().next_sibling();
+            Self::calculate_node_position(
+                &next_sibling,
+                parent_point,
+                n.borrow().kind(),
+                Some(n.borrow().point()),
+                Some(n.borrow().size()),
+            );
+        }
+    }
 }
 
 fn build_layout_tree(
