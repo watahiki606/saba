@@ -297,4 +297,83 @@ impl LayoutObject {
             NodeKind::Text(_) => self.kind = LayoutObjectKind::Text,
         }
     }
+
+    /// 1つのノードのサイズを計算する
+    /// ユーザーによって CSS でwidth や height が司令されている場合はその値を使用するが、今回は CSS で横幅と高さは指定できないので関係ない。
+    pub fn compute_size(&mut self, parent_size: LayoutSize) {
+        let mut size = LayoutSize::new(0, 0);
+
+        match self.kind() {
+            LayoutObjectKind::Block => {
+                // ノードがブロック要素の場合、親ノードの横幅がそのまま自身の横幅になる (本来はボックスモデルにおけるマージンやパディングを考慮するところ)
+                size.set_width(parent_size.width());
+
+                let mut height = 0;
+                let mut child = self.first_child();
+
+                let previous_child_kind = LayoutObjectKind::Block;
+                while child.is_some() {
+                    let c = match child {
+                        Some(c) => c,
+                        None => panic!("first child should exist"),
+                    };
+
+                    if previous_child_kind == LayoutObjectKind::Block
+                        || c.borrow().kind() == LayoutObjectKind::Block
+                    {
+                        height += c.borrow().size().height();
+                    }
+
+                    previous_child_kind = c.borrow().kind();
+                    child = c.borrow().next_sibling();
+                }
+                // ブロック要素の高さはすべての子ノードの高さの合計になる、インライン要素が横に並んでいる場合は、高さが増えることはない
+                size.set_height(height);
+            }
+            LayoutObjectKind::Inline => {
+                // ノードがインライン要素の場合、高さも横幅も子要素のサイズを足し合わせたものになる。本実装ではインライン要素の子ノードは常にテキストノードである想定
+                let mut width = 0;
+                let mut height = 0;
+                let mut child = self.first_child();
+                while child.is_some() {
+                    let c = match child {
+                        Some(c) => c,
+                        None => panic!("first child should exist"),
+                    };
+
+                    width += c.borrow().size().width();
+                    height += c.borrow().size().height();
+
+                    child = c.borrow().next_sibling();
+                }
+
+                size.set_width(width);
+                size.set_height(height);
+            }
+            LayoutObjectKind::Text => {
+                if let NodeKind::Text(t) = self.node_kind() {
+                    let ratio = match self.style.font_size() {
+                        FontSize::Medium => 1,
+                        FontSize::XLarge => 2,
+                        FontSize::XXLarge => 3,
+                    };
+                    let width = CHAR_WIDTH * ratio * t.len() as f64;
+                    if width > CONTENT_AREA_WIDTH {
+                        size.set_width(CONTENT_AREA_WIDTH);
+                        let line_num = if width.wrapping_rem(CONTENT_AREA_WIDTH) == 0 {
+                            width.wrapping_div(CONTENT_AREA_WIDTH)
+                        } else {
+                            width.wrapping_div(CONTENT_AREA_WIDTH) + 1
+                        };
+                        size.set_height(CHAR_HEIGHT_WITH_PADDING * line_num);
+                    } else {
+                        size.set_width(width);
+                        size.set_height(CHAR_HEIGHT_WITH_PADDING * ratio);
+                    }
+                }
+            }
+        }
+
+        self.size = size;
+    }
 }
