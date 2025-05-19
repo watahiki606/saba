@@ -431,3 +431,9 @@ pub fn create_layout_object(
     }
     None
 }
+
+impl PartialEq for LayoutObject {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind
+    }
+}
