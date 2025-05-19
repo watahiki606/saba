@@ -181,45 +181,6 @@ impl LayoutObject {
         }
     }
 
-    pub fn create_layout_object(
-        node: &Option<Rc<RefCell<Node>>>,
-        parent_obj: &Option<Rc<RefCell<LayoutObject>>>,
-        cssom: &StyleSheet,
-    ) -> Option<Rc<RefCell<LayoutObject>>> {
-        if let Some(n) = node {
-            // LayoutObject を作成する
-            let layout_object = Rc::new(RefCell::new(LayoutObject::new(n.clone(), parent_obj)));
-
-            // CSS のルールをセレクタで選択されたノードに適用する
-            for rule in &cssom.rules {
-                if layout_object.borrow().is_node_selected(&rule.selector) {
-                    layout_object
-                        .borrow_mut()
-                        .cascading_style(rule.declarations.clone());
-                }
-            }
-
-            // CSS でスタイルが指定されていない場合、デフォルトの値または親のノードから継承した値を使用する
-            let parent_style = if let Some(parent) = parent_obj {
-                Some(parent.borrow().style())
-            } else {
-                None
-            };
-
-            layout_object.borrow_mut().defaulting_style(n, parent_style);
-
-            // display プロパティが none の場合、ノードを作成しない
-            if layout_object.borrow().style().display() == DisplayType::DisplayNone {
-                return None;
-            }
-
-            // display プロパティの最終的な値を使用してノードの種類を決定する
-            layout_object.borrow_mut().update_kind();
-            return Some(layout_object);
-        }
-        None
-    }
-
     pub fn cascading_style(&mut self, declarations: Vec<Declaration>) {
         for declaration in declarations {
             match declaration.property.as_str() {
@@ -376,4 +337,97 @@ impl LayoutObject {
 
         self.size = size;
     }
+
+    /// 1つのノードの位置を計算する.
+    /// ノードの位置は現在のノード、親ノードの位置、隣り合わせの兄弟ノードによって決定する
+    ///
+    /// * `node` - 計算対象のノード
+    /// * `parent_point` - 親ノードの位置
+    /// * `previous_sibling_kind` - 自分より前の兄弟ノードの種類
+    /// * `previous_sibling_point` - 自分より前の兄弟ノードの位置
+    pub fn compute_position(
+        &mut self,
+        parent_point: LayoutPoint,
+        previous_sibling_kind: LayoutObjectKind,
+        previous_sibling_point: Option<LayoutPoint>,
+        previous_sibling_size: Option<LayoutSize>,
+    ) {
+        let mut point = LayoutPoint::new(0, 0);
+
+        // もし自分自身がブロック要素、または、兄弟ノードがブロック要素の場合、このノードは新しい行から描画される、よってウインドウの下方向に向かって位置を調整する
+        match (self.kind(), previous_sibling_kind) {
+            // もしブロック要素が兄弟ノードの場合、Y 軸方向に進む
+            (LayoutObjectKind::Block, _) | (_, LayoutObjectKind::Block) => {
+                if let (Some(size), Some(pos)) = (previous_sibling_size, previous_sibling_point) {
+                    // もし兄弟ノードが存在する場合、兄弟ノードの Y 位置と高さを足し合わせたものが次の位置になる
+                    point.set_y(pos.y() + size.height());
+                } else {
+                    // もし兄弟ノードが存在しない場合、親ノードの Y 位置が次の位置になる
+                    point.set_y(parent_point.y());
+                }
+                // 新しい行から始まるため、X 軸方向は常に親ノードの X 位置になる
+                point.set_x(parent_point.x());
+            }
+            // もし自分自身と兄弟ノードがともにインライン要素の場合、同じ行に続けて配置されるためウインドウの右方向に向かって位置を調整する。
+            // もしインライン要素が並ぶ場合、X 軸方向に進む
+            (LayoutObjectKind::Inline, LayoutObjectKind::Inline) => {
+                if let (Some(size), Some(pos)) = (previous_sibling_size, previous_sibling_point) {
+                    // 兄弟ノードが存在する場合、兄弟ノードの X 位置と横幅を足したものが次の位置になる
+                    point.set_x(pos.x() + size.width());
+                    // インライン要素は兄弟ノードと同じ行に並ぶため、兄弟ノードのY位置が自身のY位置になる
+                    point.set_y(pos.y());
+                } else {
+                    // もし兄弟ノードが存在しない場合、親ノードの X 座標と Y 座標が次の位置になる
+                    point.set_x(parent_point.x());
+                    point.set_y(parent_point.y());
+                }
+            }
+            _ => {
+                // それ以外の場合、つまりテキストノードのときは親ノードの位置と同じ位置に描画する。
+                point.set_x(parent_point.x());
+                point.set_y(parent_point.y());
+            }
+        }
+
+        self.point = point;
+    }
+}
+
+pub fn create_layout_object(
+    node: &Option<Rc<RefCell<Node>>>,
+    parent_obj: &Option<Rc<RefCell<LayoutObject>>>,
+    cssom: &StyleSheet,
+) -> Option<Rc<RefCell<LayoutObject>>> {
+    if let Some(n) = node {
+        // LayoutObject を作成する
+        let layout_object = Rc::new(RefCell::new(LayoutObject::new(n.clone(), parent_obj)));
+
+        // CSS のルールをセレクタで選択されたノードに適用する
+        for rule in &cssom.rules {
+            if layout_object.borrow().is_node_selected(&rule.selector) {
+                layout_object
+                    .borrow_mut()
+                    .cascading_style(rule.declarations.clone());
+            }
+        }
+
+        // CSS でスタイルが指定されていない場合、デフォルトの値または親のノードから継承した値を使用する
+        let parent_style = if let Some(parent) = parent_obj {
+            Some(parent.borrow().style())
+        } else {
+            None
+        };
+
+        layout_object.borrow_mut().defaulting_style(n, parent_style);
+
+        // display プロパティが none の場合、ノードを作成しない
+        if layout_object.borrow().style().display() == DisplayType::DisplayNone {
+            return None;
+        }
+
+        // display プロパティの最終的な値を使用してノードの種類を決定する
+        layout_object.borrow_mut().update_kind();
+        return Some(layout_object);
+    }
+    None
 }
