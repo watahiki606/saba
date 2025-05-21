@@ -5,6 +5,7 @@ use crate::renderer::dom::node::NodeKind;
 use alloc::rc::Rc;
 use alloc::string::String;
 use alloc::string::ToString;
+use alloc::vec::Vec;
 use core::cell::RefCell;
 
 pub fn get_target_element_node(

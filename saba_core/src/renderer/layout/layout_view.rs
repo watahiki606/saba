@@ -35,7 +35,7 @@ impl LayoutView {
         self.root.clone()
     }
 
-    pub fn update_layout(&mut self) {
+    fn update_layout(&mut self) {
         Self::calculate_node_size(&self.root, LayoutSize::new(CONTENT_AREA_WIDTH, 0));
 
         Self::calculate_node_position(
@@ -205,12 +205,12 @@ mod tests {
     use crate::renderer::css::cssom::CssParser;
     use crate::renderer::css::token::CssTokenizer;
     use crate::renderer::dom::api::get_style_content;
-    use crate::renderer::dom::node::Element;
-    use crate::renderer::dom::node::NodeKind;
+    // use crate::renderer::dom::node::Element;
+    // use crate::renderer::dom::node::NodeKind;
     use crate::renderer::html::parser::HtmlParser;
     use crate::renderer::html::token::HtmlTokenizer;
     use alloc::string::String;
-    use alloc::vec::Vec;
+    // use alloc::vec::Vec;
 
     /// ユニットテストで毎回レイアウトツリーを作成するときのヘルパー関数
     fn create_layout_view(html: String) -> LayoutView {
@@ -221,5 +221,11 @@ mod tests {
         let css_tokenizer = CssTokenizer::new(style);
         let cssom = CssParser::new(css_tokenizer).parse_stylesheet();
         LayoutView::new(dom, &cssom)
+    }
+
+    #[test]
+    fn test_empty() {
+        let layout_view = create_layout_view("".to_string());
+        assert_eq!(None, layout_view.root());
     }
 }

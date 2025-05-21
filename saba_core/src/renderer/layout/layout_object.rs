@@ -29,7 +29,7 @@ pub struct LayoutObject {
     size: LayoutSize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct LayoutPoint {
     x: i64,
     y: i64,
@@ -57,7 +57,7 @@ impl LayoutPoint {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct LayoutSize {
     width: i64,
     height: i64,
@@ -138,16 +138,16 @@ impl LayoutObject {
         self.parent.clone()
     }
 
-    pub fn style(&self) -> &ComputedStyle {
-        &self.style.clone()
+    pub fn style(&self) -> ComputedStyle {
+        self.style.clone()
     }
 
-    pub fn point(&self) -> &LayoutPoint {
-        &self.point.clone()
+    pub fn point(&self) -> LayoutPoint {
+        self.point
     }
 
-    pub fn size(&self) -> &LayoutSize {
-        &self.size.clone()
+    pub fn size(&self) -> LayoutSize {
+        self.size
     }
 
     pub fn is_node_selected(&self, selector: &Selector) -> bool {
@@ -220,12 +220,12 @@ impl LayoutObject {
                     }
                 }
                 "display" => {
-                    if let ComponentValue::Ident(value) = &declaration.value {
+                    if let ComponentValue::Ident(value) = declaration.value {
                         let display_type = match DisplayType::from_str(&value) {
                             Ok(display_type) => display_type,
                             Err(_) => DisplayType::DisplayNone,
                         };
-                        self.style.set_display(display_type);
+                        self.style.set_display(display_type)
                     }
                 }
 
@@ -237,7 +237,7 @@ impl LayoutObject {
     pub fn defaulting_style(
         &mut self,
         node: &Rc<RefCell<Node>>,
-        parent_style: Option<&ComputedStyle>,
+        parent_style: Option<ComputedStyle>,
     ) {
         self.style.defaulting(node, parent_style);
     }
@@ -251,7 +251,7 @@ impl LayoutObject {
                     DisplayType::Block => self.kind = LayoutObjectKind::Block,
                     DisplayType::Inline => self.kind = LayoutObjectKind::Inline,
                     DisplayType::DisplayNone => {
-                        panic!("should not create a layout object for display:none");
+                        panic!("should not create a layout object for display:none")
                     }
                 }
             }
@@ -272,7 +272,7 @@ impl LayoutObject {
                 let mut height = 0;
                 let mut child = self.first_child();
 
-                let previous_child_kind = LayoutObjectKind::Block;
+                let mut previous_child_kind = LayoutObjectKind::Block;
                 while child.is_some() {
                     let c = match child {
                         Some(c) => c,
@@ -282,7 +282,7 @@ impl LayoutObject {
                     if previous_child_kind == LayoutObjectKind::Block
                         || c.borrow().kind() == LayoutObjectKind::Block
                     {
-                        height += c.borrow().size().height();
+                        height += c.borrow().size.height();
                     }
 
                     previous_child_kind = c.borrow().kind();
@@ -302,8 +302,8 @@ impl LayoutObject {
                         None => panic!("first child should exist"),
                     };
 
-                    width += c.borrow().size().width();
-                    height += c.borrow().size().height();
+                    width += c.borrow().size.width();
+                    height += c.borrow().size.height();
 
                     child = c.borrow().next_sibling();
                 }
@@ -318,7 +318,7 @@ impl LayoutObject {
                         FontSize::XLarge => 2,
                         FontSize::XXLarge => 3,
                     };
-                    let width = CHAR_WIDTH * ratio * t.len() as f64;
+                    let width = CHAR_WIDTH * ratio * t.len() as i64;
                     if width > CONTENT_AREA_WIDTH {
                         size.set_width(CONTENT_AREA_WIDTH);
                         let line_num = if width.wrapping_rem(CONTENT_AREA_WIDTH) == 0 {
@@ -326,7 +326,7 @@ impl LayoutObject {
                         } else {
                             width.wrapping_div(CONTENT_AREA_WIDTH) + 1
                         };
-                        size.set_height(CHAR_HEIGHT_WITH_PADDING * line_num);
+                        size.set_height(CHAR_HEIGHT_WITH_PADDING * ratio * line_num);
                     } else {
                         size.set_width(width);
                         size.set_height(CHAR_HEIGHT_WITH_PADDING * ratio);

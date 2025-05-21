@@ -87,7 +87,7 @@ impl ComputedStyle {
         self.width.expect("failed to access CSS property: width")
     }
 
-    pub fn defaulting(&mut self, node: &Rc<RefCell<Node>>, parent_style: Option<&ComputedStyle>) {
+    pub fn defaulting(&mut self, node: &Rc<RefCell<Node>>, parent_style: Option<ComputedStyle>) {
         // もし親ノードが存在し、親の CSS の値が初期値とは異なる場合、値を継承する
         if let Some(parent_style) = parent_style {
             if self.background_color.is_none() && parent_style.background_color() != Color::white()
