@@ -205,12 +205,12 @@ mod tests {
     use crate::renderer::css::cssom::CssParser;
     use crate::renderer::css::token::CssTokenizer;
     use crate::renderer::dom::api::get_style_content;
-    // use crate::renderer::dom::node::Element;
-    // use crate::renderer::dom::node::NodeKind;
+    use crate::renderer::dom::node::Element;
+    use crate::renderer::dom::node::NodeKind;
     use crate::renderer::html::parser::HtmlParser;
     use crate::renderer::html::token::HtmlTokenizer;
     use alloc::string::String;
-    // use alloc::vec::Vec;
+    use alloc::vec::Vec;
 
     /// ユニットテストで毎回レイアウトツリーを作成するときのヘルパー関数
     fn create_layout_view(html: String) -> LayoutView {
@@ -227,5 +227,25 @@ mod tests {
     fn test_empty() {
         let layout_view = create_layout_view("".to_string());
         assert_eq!(None, layout_view.root());
+    }
+
+    #[test]
+    fn test_body() {
+        let html = "<html><head></head><body></body>".to_string();
+        let layout_view = create_layout_view(html);
+
+        let root = layout_view.root();
+        assert!(root.is_some());
+        assert_eq!(
+            LayoutObjectKind::Block,
+            root.clone().expect("root should exist").borrow().kind()
+        );
+        assert_eq!(
+            NodeKind::Element(Element::new("body", Vec::new())),
+            root.clone()
+                .expect("root should exist")
+                .borrow()
+                .node_kind()
+        );
     }
 }
