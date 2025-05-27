@@ -497,3 +497,31 @@ impl PartialEq for LayoutObject {
         self.kind == other.kind
     }
 }
+
+use crate::constants::WINDOW_PADDING;
+use crate::constants::WINDOW_WIDTH;
+use alloc::string::String;
+
+fn find_index_for_line_break(line: String, max_index: usize) -> usize {
+    for i in 0..max_index.rev() {
+        if line.chars().collect::<Vec<char>>()[i] == ' ' {
+            return i;
+        }
+    }
+    max_index
+}
+
+fn split_text(line: String, char_width: i64) -> Vec<String> {
+    let mut result: Vec<String> = vec![];
+    if line.len() as i64 * char_width > (WINDOW_WIDTH + WINDOW_PADDING) {
+        let s = line.split_at(find_index_for_line_break(
+            line.clone(),
+            ((WINDOW_WIDTH + WINDOW_PADDING) / char_width) as usize,
+        ));
+        result.push(s.0.to_string());
+        result.extend(split_text(s.1.trim().to_string(), char_width));
+    } else {
+        result.push(line);
+    }
+    result
+}
