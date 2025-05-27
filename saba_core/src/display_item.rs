@@ -5,7 +5,7 @@ use alloc::string::String;
 
 #[derive(Debug, Clone, PartialEq)]
 /// - 本書のブラウザでは資格とテキストを描画できる
-pub enum Displayitem {
+pub enum DisplayItem {
     Rect {
         stle: ComputedStyle,
         layout_point: LayoutPoint,

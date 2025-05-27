@@ -1,19 +1,26 @@
 use crate::alloc::string::ToString;
 use crate::browser::Browser;
+use crate::display_item::DisplayItem;
 use crate::http::HttpResponse;
+use crate::renderer::css::cssom::StyleSheet;
 use crate::renderer::dom::node::Window;
 use crate::renderer::html::parser::HtmlParser;
 use crate::renderer::html::token::HtmlTokenizer;
+use crate::renderer::layout::layout_view::LayoutView;
 use crate::utils::convert_dom_to_string;
 use alloc::rc::Rc;
 use alloc::rc::Weak;
 use alloc::string::String;
+use alloc::vec::Vec;
 use core::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub struct Page {
     browser: Weak<RefCell<Browser>>,
     frame: Option<Rc<RefCell<Window>>>,
+    style: Option<StyleSheet>,
+    layout_view: Option<LayoutView>,
+    display_items: Vec<DisplayItem>,
 }
 
 impl Page {
@@ -21,6 +28,9 @@ impl Page {
         Self {
             browser: Weak::new(),
             frame: None,
+            style: None,
+            layout_view: None,
+            display_items: Vec::new(),
         }
     }
 
