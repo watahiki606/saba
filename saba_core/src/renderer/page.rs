@@ -58,4 +58,20 @@ impl Page {
         self.frame = Some(frame);
         self.style = Some(cssom);
     }
+
+    fn set_layout_view(&mut self) {
+        let dom = match &self.frame {
+            Some(frame) => frame.borrow().document(),
+            None => return,
+        };
+
+        let style = match self.style.clone() {
+            Some(style) => style,
+            None => return,
+        };
+
+        let layout_view = LayoutView::new(dom, &style);
+
+        self.layout_view = Some(layout_view);
+    }
 }
