@@ -38,17 +38,11 @@ impl Page {
         self.browser = browser;
     }
 
-    pub fn receive_response(&mut self, response: HttpResponse) -> String {
+    pub fn receive_response(&mut self, response: HttpResponse) {
         self.create_frame(response.body());
 
-        // デバッグ用にDOMツリーを文字列として返す
-        if let Some(frame) = &self.frame {
-            let dom = frame.borrow().document().clone();
-            let debug = convert_dom_to_string(&Some(dom));
-            return debug;
-        }
-
-        "".to_string()
+        self.set_layout_view();
+        self.paint_tree();
     }
 
     pub fn create_frame(&mut self, html: String) {
