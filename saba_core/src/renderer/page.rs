@@ -1,13 +1,14 @@
-use crate::alloc::string::ToString;
 use crate::browser::Browser;
 use crate::display_item::DisplayItem;
 use crate::http::HttpResponse;
+use crate::renderer::css::cssom::CssParser;
 use crate::renderer::css::cssom::StyleSheet;
+use crate::renderer::css::token::CssTokenizer;
+use crate::renderer::dom::api::get_style_content;
 use crate::renderer::dom::node::Window;
 use crate::renderer::html::parser::HtmlParser;
 use crate::renderer::html::token::HtmlTokenizer;
 use crate::renderer::layout::layout_view::LayoutView;
-use crate::utils::convert_dom_to_string;
 use alloc::rc::Rc;
 use alloc::rc::Weak;
 use alloc::string::String;
@@ -48,6 +49,13 @@ impl Page {
     pub fn create_frame(&mut self, html: String) {
         let html_tokenizer = HtmlTokenizer::new(html);
         let frame = HtmlParser::new(html_tokenizer).construct_tree();
+        let dom = frame.borrow().document();
+
+        let style = get_style_content(dom);
+        let css_tokenizer = CssTokenizer::new(style);
+        let cssom = CssParser::new(css_tokenizer).parse_stylesheet();
+
         self.frame = Some(frame);
+        self.style = Some(cssom);
     }
 }
