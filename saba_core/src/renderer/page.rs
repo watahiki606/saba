@@ -74,4 +74,10 @@ impl Page {
 
         self.layout_view = Some(layout_view);
     }
+
+    fn paint_tree(&mut self) {
+        if let Some(layout_view) = &self.layout_view {
+            self.display_items = layout_view.paint();
+        }
+    }
 }
