@@ -80,4 +80,12 @@ impl Page {
             self.display_items = layout_view.paint();
         }
     }
+
+    pub fn display_items(&self) -> Vec<DisplayItem> {
+        self.display_items.clone()
+    }
+
+    pub fn clear_display_items(&mut self) {
+        self.display_items = Vec::new();
+    }
 }
