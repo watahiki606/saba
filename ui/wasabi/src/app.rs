@@ -72,7 +72,8 @@ impl WasabiUI {
             .draw_line(GREY, 70, 2, 70, 2 + ADDRESSBAR_HEIGHT)?;
         self.window.draw_line(BLACK, 71, 3, WINDOW_WIDTH - 5, 3)?;
 
-        self.window.draw_line(GREY, 71, 3, 71, 1 + WINDOW_WIDTH)?;
+        self.window
+            .draw_line(GREY, 71, 3, 71, 1 + ADDRESSBAR_HEIGHT)?;
 
         Ok(())
     }
