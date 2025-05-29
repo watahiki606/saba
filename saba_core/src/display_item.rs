@@ -7,7 +7,7 @@ use alloc::string::String;
 /// - 本書のブラウザでは資格とテキストを描画できる
 pub enum DisplayItem {
     Rect {
-        stle: ComputedStyle,
+        style: ComputedStyle,
         layout_point: LayoutPoint,
         layout_size: LayoutSize,
     },

@@ -503,7 +503,7 @@ use crate::constants::WINDOW_WIDTH;
 use alloc::string::String;
 
 fn find_index_for_line_break(line: String, max_index: usize) -> usize {
-    for i in 0..max_index.rev() {
+    for i in (0..max_index).rev() {
         if line.chars().collect::<Vec<char>>()[i] == ' ' {
             return i;
         }
