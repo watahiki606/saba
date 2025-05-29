@@ -90,4 +90,17 @@ impl WasabiUI {
 
         Ok(())
     }
+
+    pub fn start(&mut self) -> Result<(), Error> {
+        self.setup()?;
+
+        self.run_app()?;
+
+        Ok(())
+    }
+
+    fn run_app(&mut self) -> Result<(), Error> {
+        // 後ほど実装する
+        Ok(())
+    }
 }
