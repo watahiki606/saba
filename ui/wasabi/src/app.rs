@@ -107,6 +107,7 @@ impl WasabiUI {
     fn run_app(&mut self) -> Result<(), Error> {
         loop {
             self.handle_mouse_input()?;
+            self.handle_key_input()?;
         }
     }
 
@@ -116,6 +117,14 @@ impl WasabiUI {
             if button.l() || button.c() || button.r() {
                 println!("mouse clicked {:?}", button);
             }
+        }
+
+        Ok(())
+    }
+
+    fn handle_key_input(&mut self) -> Result<(), Error> {
+        if let Some(c) = Api::read_key() {
+            println!("key {:?}", c);
         }
 
         Ok(())
