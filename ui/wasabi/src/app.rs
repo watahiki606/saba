@@ -22,12 +22,14 @@ use saba_core::error::Error;
 pub struct WasabiUI {
     browser: Rc<RefCell<Browser>>,
     window: Window,
+    input_mode: InputMode,
 }
 
 impl WasabiUI {
     pub fn new(browser: Rc<RefCell<Browser>>) -> Self {
         Self {
             browser,
+            input_mode: InputMode::Normal,
             window: Window::new(
                 "saba".to_string(),
                 WHITE,
@@ -129,4 +131,11 @@ impl WasabiUI {
 
         Ok(())
     }
+}
+
+
+#[derive(Clone,Copy,Debug,Eq,PartialEq)]
+enum InputMode {
+    Normal,
+    Editing,,
 }
