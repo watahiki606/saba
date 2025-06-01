@@ -1,6 +1,7 @@
 use crate::alloc::string::ToString;
 use alloc::format;
 use alloc::rc::Rc;
+use alloc::string::String;
 use core::cell::RefCell;
 use noli::error::Result as OSResult;
 use noli::prelude::SystemApi;
@@ -21,6 +22,7 @@ use saba_core::error::Error;
 #[derive(Debug)]
 pub struct WasabiUI {
     browser: Rc<RefCell<Browser>>,
+    input_url: String,
     window: Window,
     input_mode: InputMode,
 }
@@ -29,6 +31,7 @@ impl WasabiUI {
     pub fn new(browser: Rc<RefCell<Browser>>) -> Self {
         Self {
             browser,
+            input_url: String::new(),
             input_mode: InputMode::Normal,
             window: Window::new(
                 "saba".to_string(),
@@ -125,17 +128,29 @@ impl WasabiUI {
     }
 
     fn handle_key_input(&mut self) -> Result<(), Error> {
-        if let Some(c) = Api::read_key() {
-            println!("key {:?}", c);
+        match self.input_mode {
+            InputMode::Normal => {
+                // InputMode が Normal の場合はキー入力を無視する
+                let _ = Api::read_key();
+            }
+            InputMode::Editing => {
+                if let Some(c) = Api::read_key() {
+                    if c == 0x7F as char || c == 0x08 as char {
+                        // デリートキーまたはバックスペースキーが押された場合最後の文字を削除する
+                        self.input_url.pop();
+                    } else {
+                        self.input_url.push(c);
+                    }
+                }
+            }
         }
 
         Ok(())
     }
 }
 
-
-#[derive(Clone,Copy,Debug,Eq,PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum InputMode {
     Normal,
-    Editing,,
+    Editing,
 }
