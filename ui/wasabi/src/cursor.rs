@@ -9,7 +9,7 @@ pub struct Cursor {
 
 impl Cursor {
     pub fn new() -> Self {
-        let mut sheet = SHeet::new(Rect::new(0, 0, 10, 10).unwrap());
+        let mut sheet = Sheet::new(Rect::new(0, 0, 10, 10).unwrap());
         let bitmap = sheet.bitmap();
         bitmap_draw_rect(bitmap, 0xff0000, 0, 0, 10, 10).expect("failed to draw a cursor");
         Self { sheet }
