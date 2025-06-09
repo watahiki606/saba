@@ -21,7 +21,15 @@ use saba_core::constants::WINDOW_WIDTH;
 use saba_core::constants::*;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
+use saba_core::renderer::layout::compute_style::FontSize;
 
+fn convert_font_size(size: FontSize) -> StringSize {
+    match size {
+        FontSize::Medium => StringSize::Medium,
+        FontSize::XLarge => StringSize::Large,
+        FontSize::XXLarge => StringSize::XLarge,
+    }
+}
 #[derive(Debug)]
 pub struct WasabiUI {
     browser: Rc<RefCell<Browser>>,
