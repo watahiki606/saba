@@ -9,31 +9,12 @@ use alloc::rc::Rc;
 use alloc::string::String;
 use core::cell::RefCell;
 use net_wasabi::http::HttpClient;
-use noli::prelude::*;
+use noli::*;
 use saba_core::browser::Browser;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
 use saba_core::url::Url;
 use ui_wasabi::app::WasabiUI;
-
-fn main() -> u64 {
-    // Browser 構造体を初期化
-    let browser = Browser::new();
-
-    // WasabiUI 構造体を初期化
-    let ui = Rc::new(RefCell::new(WasabiUI::new(browser)));
-
-    // アプリの実行を開始
-    match ui.borrow_mut().start(handle_url) {
-        Ok(_) => {}
-        Err(e) => {
-            println!("browser fails to start {:?}", e);
-            return 1;
-        }
-    };
-
-    0
-}
 
 fn handle_url(url: String) -> Result<HttpResponse, Error> {
     // URL を解釈する
@@ -91,6 +72,25 @@ fn handle_url(url: String) -> Result<HttpResponse, Error> {
         }
     };
     Ok(response)
+}
+
+fn main() -> u64 {
+    // Browser 構造体を初期化
+    let browser = Browser::new();
+
+    // WasabiUI 構造体を初期化
+    let ui = Rc::new(RefCell::new(WasabiUI::new(browser)));
+
+    // アプリの実行を開始
+    match ui.borrow_mut().start(handle_url) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("browser fails to start {:?}", e);
+            return 1;
+        }
+    };
+
+    0
 }
 
 entry_point!(main);
