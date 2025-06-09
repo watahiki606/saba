@@ -3,10 +3,10 @@
 
 extern crate alloc;
 
+use crate::alloc::string::ToString;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::String;
-use alloc::string::ToString;
 use core::cell::RefCell;
 use net_wasabi::http::HttpClient;
 use noli::prelude::*;
