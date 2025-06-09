@@ -3,10 +3,17 @@
 
 extern crate alloc;
 
+use alloc::format;
 use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::string::ToString;
 use core::cell::RefCell;
+use net_wasabi::http::HttpClient;
 use noli::prelude::*;
 use saba_core::browser::Browser;
+use saba_core::error::Error;
+use saba_core::http::HttpResponse;
+use saba_core::url::Url;
 use ui_wasabi::app::WasabiUI;
 
 fn main() -> u64 {
@@ -17,7 +24,7 @@ fn main() -> u64 {
     let ui = Rc::new(RefCell::new(WasabiUI::new(browser)));
 
     // アプリの実行を開始
-    match ui.borrow_mut().start() {
+    match ui.borrow_mut().start(handle_url) {
         Ok(_) => {}
         Err(e) => {
             println!("browser fails to start {:?}", e);
@@ -28,7 +35,7 @@ fn main() -> u64 {
     0
 }
 
-fn handle_url(url: String) -> Result<Httpresponse, Error> {
+fn handle_url(url: String) -> Result<HttpResponse, Error> {
     // URL を解釈する
     let parsed_url = match Url::new(url.to_string()).parse() {
         Ok(url) => url,
@@ -52,7 +59,7 @@ fn handle_url(url: String) -> Result<Httpresponse, Error> {
     ) {
         Ok(res) => {
             // HTTP レスポンスのステータスコードが302のとき、転送する(リダイレクト)
-            if res.status_code == 302 {
+            if res.status_code() == 302 {
                 let location = match res.header_value("Location") {
                     Ok(value) => value,
                     Err(_) => return Ok(res),

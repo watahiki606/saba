@@ -106,18 +106,24 @@ impl WasabiUI {
         Ok(())
     }
 
-    pub fn start(&mut self) -> Result<(), Error> {
+    pub fn start(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+    ) -> Result<(), Error> {
         self.setup()?;
 
-        self.run_app()?;
+        self.run_app(handle_url)?;
 
         Ok(())
     }
 
-    fn run_app(&mut self) -> Result<(), Error> {
+    fn run_app(
+        &mut self,
+        handle_url: fn(String) -> Result<HttpResponse, Error>,
+    ) -> Result<(), Error> {
         loop {
             self.handle_mouse_input()?;
-            self.handle_key_input()?;
+            self.handle_key_input(handle_url)?;
         }
     }
 
@@ -275,7 +281,7 @@ impl WasabiUI {
         match handle_url(destination) {
             Ok(response) => {
                 let page = self.browser.borrow().current_page();
-                page.borrow_mut().receive_response(response)?;
+                page.borrow_mut().receive_response(response);
             }
             Err(error) => {
                 return Err(error);
