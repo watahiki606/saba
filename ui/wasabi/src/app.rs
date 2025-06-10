@@ -22,8 +22,8 @@ use saba_core::constants::*;
 use saba_core::display_item::DisplayItem;
 use saba_core::error::Error;
 use saba_core::http::HttpResponse;
-use saba_core::renderer::layout::compute_style::FontSize;
-use saba_core::renderer::layout::compute_style::TextDecoration;
+use saba_core::renderer::layout::computed_style::FontSize;
+use saba_core::renderer::layout::computed_style::TextDecoration;
 
 fn convert_font_size(size: FontSize) -> StringSize {
     match size {
