@@ -111,6 +111,10 @@ impl JsParser {
         }
         node
     }
+
+    fn assignment_expression(&mut self) -> Option<Rc<Node>> {
+        self.additive_expression()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
