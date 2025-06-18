@@ -1,5 +1,6 @@
 use crate::renderer::js::token::JsLexer;
 use alloc::rc::Rc;
+use alloc::vec::Vec;
 use core::iter::Peekable;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -70,5 +71,24 @@ pub struct JsParser {
 impl JsParser {
     pub fn new(t: JsLexer) -> Self {
         Self { t: t.peekable() }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Program {
+    body: Vec<Rc<Node>>,
+}
+
+impl Program {
+    pub fn new(body: Vec<Rc<Node>>) -> Self {
+        Self { body: Vec::new() }
+    }
+
+    pub fn set_body(&mut self, body: Vec<Rc<Node>>) {
+        self.body = body;
+    }
+
+    pub fn body(&self) -> &Vec<Rc<Node>> {
+        &self.body
     }
 }
