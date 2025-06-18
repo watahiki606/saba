@@ -98,7 +98,7 @@ impl JsParser {
             None => return None,
         };
 
-        self.statement();
+        self.statement()
     }
 
     fn statement(&mut self) -> Option<Rc<Node>> {
