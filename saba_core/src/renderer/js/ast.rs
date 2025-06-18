@@ -1,4 +1,5 @@
 use crate::renderer::js::token::JsLexer;
+use crate::renderer::js::token::Token;
 use alloc::rc::Rc;
 use alloc::vec::Vec;
 use core::iter::Peekable;
@@ -98,6 +99,17 @@ impl JsParser {
         };
 
         self.statement();
+    }
+
+    fn statement(&mut self) -> Option<Rc<Node>> {
+        let node = Node::new_expression_statement(self.assignment_expression());
+        if let Some(Token::Punctuator(c)) = self.t.peek() {
+            // ';'を消費する
+            if c == &';' {
+                assert!(self.t.next().is_some());
+            }
+        }
+        node
     }
 }
 
