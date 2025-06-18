@@ -137,6 +137,26 @@ impl JsParser {
             _ => left,
         }
     }
+
+    fn left_hand_side_expression(&mut self) -> Option<Rc<Node>> {
+        self.member_expression()
+    }
+
+    fn member_expression(&mut self) -> Option<Rc<Node>> {
+        self.primary_expression()
+    }
+
+    fn primary_expression(&mut self) -> Option<Rc<Node>> {
+        let t = match self.t.next() {
+            Some(token) => token,
+            None => return None,
+        };
+
+        match t {
+            Token::Number(value) => Node::new_numeric_literal(value),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
