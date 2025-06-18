@@ -115,6 +115,28 @@ impl JsParser {
     fn assignment_expression(&mut self) -> Option<Rc<Node>> {
         self.additive_expression()
     }
+
+    fn additive_expression(&mut self) -> Option<Rc<Node>> {
+        let left = self.left_hand_side_expression();
+
+        let t = match self.t.peek() {
+            Some(token) => token.clone(),
+            None => return left,
+        };
+
+        match t {
+            Token::Punctuator(c) => match c {
+                '+' | '-' => {
+                    // '+' or '-'を消費する
+                    assert!(self.t.next().is_some());
+                    let right = self.additive_expression();
+                    Node::new_additive_expression(c, left, self.assignment_expression())
+                }
+                _ => left,
+            },
+            _ => left,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
