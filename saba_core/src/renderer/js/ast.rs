@@ -72,6 +72,33 @@ impl JsParser {
     pub fn new(t: JsLexer) -> Self {
         Self { t: t.peekable() }
     }
+
+    pub fn parse_ast(&mut self) -> Program {
+        let mut program = Program::new();
+
+        let mut body = Vec::new();
+
+        loop {
+            let node = self.source_element();
+
+            match node {
+                Some(n) => body.push(n),
+                None => {
+                    program.set_body(body);
+                    return program;
+                }
+            }
+        }
+    }
+
+    fn source_element(&mut self) -> Option<Rc<Node>> {
+        match self.t.peek() {
+            Some(t) => t,
+            None => return None,
+        };
+
+        self.statement();
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,7 +107,7 @@ pub struct Program {
 }
 
 impl Program {
-    pub fn new(body: Vec<Rc<Node>>) -> Self {
+    pub fn new() -> Self {
         Self { body: Vec::new() }
     }
 
