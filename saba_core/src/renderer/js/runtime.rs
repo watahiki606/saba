@@ -62,3 +62,8 @@ impl JsRuntime {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum RuntimeValue {
+    Number(u64),
+}
