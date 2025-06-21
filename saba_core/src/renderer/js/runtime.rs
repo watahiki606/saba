@@ -2,6 +2,8 @@ use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
 use core::borrow::Borrow;
+use core::ops::Add;
+use core::ops::Sub;
 #[derive(Debug, Clone)]
 pub struct JsRuntime {}
 
@@ -66,4 +68,22 @@ impl JsRuntime {
 #[derive(Debug, Clone, PartialEq)]
 pub enum RuntimeValue {
     Number(u64),
+}
+
+impl Add<RuntimeValue> for RuntimeValue {
+    type Output = RuntimeValue;
+
+    fn add(self, rhs: RuntimeValue) -> RuntimeValue {
+        let (RuntimeValue::Number(left_num), RuntimeValue::Number(right_num)) = (&self, &rhs);
+        return RuntimeValue::Number(left_num + right_num);
+    }
+}
+
+impl Sub<RuntimeValue> for RuntimeValue {
+    type Output = RuntimeValue;
+
+    fn sub(self, rhs: RuntimeValue) -> RuntimeValue {
+        let (RuntimeValue::Number(left_num), RuntimeValue::Number(right_num)) = (&self, &rhs);
+        return RuntimeValue::Number(left_num - right_num);
+    }
 }
