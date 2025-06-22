@@ -2,6 +2,8 @@ use alloc::string::String;
 use alloc::string::ToString;
 use alloc::vec::Vec;
 
+static RESERVED_WORDS: [&str; 1] = ["var"];
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token {
     Punctuator(char),
@@ -44,6 +46,29 @@ impl JsLexer {
         }
         return num;
     }
+
+    fn contains(&self, keyword: &str) -> bool {
+        for i in 0..keyword.len() {
+            if keyword
+                .chars()
+                .nth(i)
+                .expect("failed to access to i-th char")
+                != self.input[self.pos + i]
+            {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn check_reserved_word(&self) -> Option<String> {
+        for word in RESERVED_WORDS {
+            if self.contains(word) {
+                return Some(word.to_string());
+            }
+        }
+        None
+    }
 }
 
 impl Iterator for JsLexer {
@@ -61,6 +86,13 @@ impl Iterator for JsLexer {
             if self.pos >= self.input.len() {
                 return None;
             }
+        }
+
+        // 予約後が現れたら、Keyword トークンを返す
+        if let Some(keyword) = self.check_reserved_word() {
+            self.pos += keyword.len();
+            let token = Some(Token::Keyword(keyword));
+            return token;
         }
 
         let c = self.input[self.pos];
