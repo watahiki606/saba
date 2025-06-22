@@ -6,6 +6,9 @@ use alloc::vec::Vec;
 pub enum Token {
     Punctuator(char),
     Number(u64),
+    Identifier(String),
+    Keyword(String),
+    StringLiteral(String),
 }
 
 pub struct JsLexer {
