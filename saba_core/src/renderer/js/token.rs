@@ -69,6 +69,23 @@ impl JsLexer {
         }
         None
     }
+
+    fn consume_identifier(&mut self) -> String {
+        let mut result = String::new();
+
+        loop {
+            if self.pos >= self.input.len() {
+                return result;
+            }
+
+            if self.input[self.pos].is_ascii_alphanumeric() || self.input[self.pos] == '$' {
+                result.push(self.input[self.pos]);
+                self.pos += 1;
+            } else {
+                return result;
+            }
+        }
+    }
 }
 
 impl Iterator for JsLexer {
@@ -104,6 +121,7 @@ impl Iterator for JsLexer {
                 t
             }
             '0'..='9' => Token::Number(self.consume_number()),
+            'a'..='z' | 'A'..='Z' | '_' | '$' => Token::Identifier(self.consume_identifier()),
             _ => unimplemented!("char {:?} is not supported", c),
         };
 
