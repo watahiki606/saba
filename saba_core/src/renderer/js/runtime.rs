@@ -128,4 +128,21 @@ mod tests {
             i += 1;
         }
     }
+
+    #[test]
+    fn test_sub_nums() {
+        let input = "2 - 1".to_string();
+        let lexer = JsLexer::new(input);
+        let mut parser = JsParser::new(lexer);
+        let ast = parser.parse_ast();
+        let mut runtime = JsRuntime::new();
+        let expected = [Some(RuntimeValue::Number(1))];
+        let mut i = 0;
+
+        for node in ast.body() {
+            let result = runtime.eval(&Some(node.clone()));
+            assert_eq!(expected[i], result);
+            i += 1;
+        }
+    }
 }
