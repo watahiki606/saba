@@ -111,4 +111,21 @@ mod tests {
             i += 1;
         }
     }
+
+    #[test]
+    fn test_add_nums() {
+        let input = "1 + 2".to_string();
+        let lexer = JsLexer::new(input);
+        let mut parser = JsParser::new(lexer);
+        let ast = parser.parse_ast();
+        let mut runtime = JsRuntime::new();
+        let expected = [Some(RuntimeValue::Number(3))];
+        let mut i = 0;
+
+        for node in ast.body() {
+            let result = runtime.eval(&Some(node.clone()));
+            assert_eq!(expected[i], result);
+            i += 1;
+        }
+    }
 }
