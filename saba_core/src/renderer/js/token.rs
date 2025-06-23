@@ -47,6 +47,25 @@ impl JsLexer {
         return num;
     }
 
+    fn consume_string(&mut self) -> String {
+        let mut result = String::new();
+        self.pos += 1;
+
+        loop {
+            if self.pos >= self.input.len() {
+                return result;
+            }
+
+            if self.input[self.pos] == '"' {
+                self.pos += 1;
+                return result;
+            }
+
+            result.push(self.input[self.pos]);
+            self.pos += 1;
+        }
+    }
+
     fn contains(&self, keyword: &str) -> bool {
         for i in 0..keyword.len() {
             if keyword
@@ -122,6 +141,7 @@ impl Iterator for JsLexer {
             }
             '0'..='9' => Token::Number(self.consume_number()),
             'a'..='z' | 'A'..='Z' | '_' | '$' => Token::Identifier(self.consume_identifier()),
+            '"' => Token::StringLiteral(self.consume_string()),
             _ => unimplemented!("char {:?} is not supported", c),
         };
 
