@@ -134,7 +134,25 @@ impl JsParser {
     }
 
     fn statement(&mut self) -> Option<Rc<Node>> {
-        let node = Node::new_expression_statement(self.assignment_expression());
+        let t = match self.t.peek() {
+            Some(t) => t,
+            None => return None,
+        };
+
+        let node = match t {
+            Token::Keyword(keyword) => {
+                if keyword == "var" {
+                    // 'var'の予約後を消費する
+                    assert!(self.t.next().is_some());
+
+                    self.variable_declaration()
+                } else {
+                    None
+                }
+            }
+            _ => Node::new_expression_statement(self.assignment_expression()),
+        };
+
         if let Some(Token::Punctuator(c)) = self.t.peek() {
             // ';'を消費する
             if c == &';' {
