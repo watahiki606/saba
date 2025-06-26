@@ -206,6 +206,17 @@ impl JsParser {
             _ => None,
         }
     }
+
+    fn variable_declaration(&mut self) -> Option<Rc<Node>> {
+        let ident = self.identifier();
+
+        let declarator = Node::new_variable_declarator(ident, self.initialiser);
+
+        let mut declarations = Vec::new();
+        declarations.push(declarator);
+
+        Node::new_variable_declaration(declarations)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
