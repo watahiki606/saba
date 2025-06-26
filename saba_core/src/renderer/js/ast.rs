@@ -210,7 +210,7 @@ impl JsParser {
     fn variable_declaration(&mut self) -> Option<Rc<Node>> {
         let ident = self.identifier();
 
-        let declarator = Node::new_variable_declarator(ident, self.initialiser);
+        let declarator = Node::new_variable_declarator(ident, self.initialiser());
 
         let mut declarations = Vec::new();
         declarations.push(declarator);
@@ -226,6 +226,21 @@ impl JsParser {
 
         match t {
             Token::Identifier(name) => Node::new_identifier(name),
+            _ => None,
+        }
+    }
+
+    fn initialiser(&mut self) -> Option<Rc<Node>> {
+        let t = match self.t.next() {
+            Some(token) => token,
+            None => return None,
+        };
+
+        match t {
+            Token::Punctuator(c) => match c {
+                '=' => self.assignment_expression(),
+                _ => None,
+            },
             _ => None,
         }
     }
