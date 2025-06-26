@@ -163,7 +163,21 @@ impl JsParser {
     }
 
     fn assignment_expression(&mut self) -> Option<Rc<Node>> {
-        self.additive_expression()
+        let expr = self.additive_expression();
+
+        let t = match self.t.peek() {
+            Some(token) => token.clone(),
+            None => return expr,
+        };
+
+        match t {
+            Token::Punctuator('=') => {
+                // '='を消費する
+                assert!(self.t.next().is_some());
+                Node::new_assignment_expression('=', expr, self.assignment_expression())
+            }
+            _ => expr,
+        }
     }
 
     fn additive_expression(&mut self) -> Option<Rc<Node>> {
