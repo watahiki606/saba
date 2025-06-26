@@ -216,6 +216,8 @@ impl JsParser {
         };
 
         match t {
+            Token::Identifier(value) => Node::new_identifier(value),
+            Token::StringLiteral(value) => Node::new_string_literal(value),
             Token::Number(value) => Node::new_numeric_literal(value),
             _ => None,
         }
