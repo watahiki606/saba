@@ -217,6 +217,18 @@ impl JsParser {
 
         Node::new_variable_declaration(declarations)
     }
+
+    fn identifier(&mut self) -> Option<Rc<Node>> {
+        let t = match self.t.next() {
+            Some(token) => token,
+            None => return None,
+        };
+
+        match t {
+            Token::Identifier(name) => Node::new_identifier(name),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
