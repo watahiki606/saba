@@ -61,6 +61,8 @@ impl JsRuntime {
                 None
             }
             Node::NumericLiteral(value) => Some(RuntimeValue::Number(*value)),
+            // ノードの種類を追加したので、デフォルトアームを追加
+            _ => todo!(),
         }
     }
 }
