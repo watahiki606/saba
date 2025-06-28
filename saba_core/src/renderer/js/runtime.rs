@@ -1,6 +1,7 @@
 use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
+use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cell::RefCell;
 use core::ops::Add;
@@ -8,6 +9,23 @@ use core::ops::Sub;
 #[derive(Debug, Clone)]
 pub struct JsRuntime {
     env: Rc<RefCell<Environment>>,
+}
+
+type VariableMap = Vec<(String, Option<RuntimeValue>)>;
+
+#[derive(Debug, Clone)]
+pub struct Environment {
+    variables: VariableMap,
+    outer: Option<Rc<RefCell<Environment>>>,
+}
+
+impl Environment {
+    pub fn new(outer: Option<Rc<RefCell<Environment>>>) -> Self {
+        Self {
+            variables: Vec::new(),
+            outer,
+        }
+    }
 }
 
 impl JsRuntime {
