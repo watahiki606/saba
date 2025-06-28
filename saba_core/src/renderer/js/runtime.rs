@@ -2,14 +2,19 @@ use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
 use core::borrow::Borrow;
+use core::cell::RefCell;
 use core::ops::Add;
 use core::ops::Sub;
 #[derive(Debug, Clone)]
-pub struct JsRuntime {}
+pub struct JsRuntime {
+    env: Rc<RefCell<Environment>>,
+}
 
 impl JsRuntime {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            env: Rc::new(RefCell::new(Environment::new(None))),
+        }
     }
 
     pub fn execute(&mut self, program: &Program) {
