@@ -1,11 +1,13 @@
 use crate::renderer::js::ast::Node;
 use crate::renderer::js::ast::Program;
 use alloc::rc::Rc;
+use alloc::string::String;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::cell::RefCell;
 use core::ops::Add;
 use core::ops::Sub;
+
 #[derive(Debug, Clone)]
 pub struct JsRuntime {
     env: Rc<RefCell<Environment>>,
@@ -24,6 +26,19 @@ impl Environment {
         Self {
             variables: Vec::new(),
             outer,
+        }
+    }
+
+    pub fn get_variable(&self, name: String) -> Option<RuntimeValue> {
+        for variable in &self.variables {
+            if variable.0 == name {
+                return variable.1.clone();
+            }
+        }
+        if let Some(env) = &self.outer {
+            env.borrow_mut().get_variable(name)
+        } else {
+            None
         }
     }
 }
