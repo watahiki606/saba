@@ -41,6 +41,21 @@ impl Environment {
             None
         }
     }
+
+    fn add_variable(&mut self, name: String, value: Option<RuntimeValue>) {
+        self.variables.push((name, value));
+    }
+
+    fn update_variable(&mut self, name: String, value: Option<RuntimeValue>) {
+        for i in 0..self.variables.len() {
+            // もし変数を見つけた場合、今までの名前と値のタプルを削除し、新しい名前と値のタプルを追加する
+            if self.variables[i].0 == name {
+                self.variables.remove(i);
+                self.variables.push((name, value));
+                return;
+            }
+        }
+    }
 }
 
 impl JsRuntime {
