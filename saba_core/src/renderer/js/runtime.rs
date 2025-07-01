@@ -28,7 +28,7 @@ pub struct Environment {
 impl Environment {
     pub fn new(outer: Option<Rc<RefCell<Environment>>>) -> Self {
         Self {
-            variables: Vec::new(),
+            variables: VariableMap::new(),
             outer,
         }
     }
@@ -160,7 +160,7 @@ impl JsRuntime {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RuntimeValue {
     Number(u64),
     StringLiteral(String),
