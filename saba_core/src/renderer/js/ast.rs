@@ -163,12 +163,22 @@ impl JsParser {
     }
 
     fn source_element(&mut self) -> Option<Rc<Node>> {
-        match self.t.peek() {
+        let t = match self.t.peek() {
             Some(t) => t,
             None => return None,
         };
-
-        self.statement()
+        match t {
+            Token::Keyword(keyword) => {
+                if keyword == "function" {
+                    // 'function'キーワードを消費する
+                    assert!(self.t.next().is_some());
+                    self.function_declaration()
+                } else {
+                    self.statement()
+                }
+            }
+            _ => self.statement(),
+        }
     }
 
     fn statement(&mut self) -> Option<Rc<Node>> {
