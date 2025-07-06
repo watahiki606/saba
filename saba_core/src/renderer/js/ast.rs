@@ -308,6 +308,12 @@ impl JsParser {
             _ => None,
         }
     }
+
+    fn function_declaration(&mut self) -> Option<Rc<Node>> {
+        let id = self.identifier();
+        let params = self.parameter_list();
+        Node::new_function_declaration(id, params, self.function_body())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
