@@ -314,6 +314,41 @@ impl JsParser {
         let params = self.parameter_list();
         Node::new_function_declaration(id, params, self.function_body())
     }
+
+    fn parameter_list(&mut self) -> Vec<Option<Rc<Node>>> {
+        let mut params = Vec::new();
+        
+        // '('を消費する。もし次のトークンが'('でない場合はエラーになる
+        match self.t.next() {
+            Some(t) => match t {
+                Token::Punctuator(c) => assert!(c == '('),
+                _ => unimplemented!("function should have '(' but got {:?}", t),
+            },
+            None => unimplemented!("function should have '(' but got None"),
+        }
+
+        loop {
+            // ')'に到達するまで、params に仮引数となる変数を追加する
+            match self.t.peek() {
+                Some(t) => match t {
+                    Token::Punctuator(c) => {
+                        if c == &')' {
+                            // ')'を消費する
+                            assert!(self.t.next().is_some());
+                            return params;
+                        }
+                        if c == &',' {
+                            // ','を消費する
+                            assert!(self.t.next().is_some());
+                        }
+                    }
+                    _ => {params.push(self.identifier()),
+                    }
+                },
+                None => return params,
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
