@@ -277,6 +277,31 @@ impl JsParser {
         }
     }
 
+    fn arguments(&mut self) -> Vec<Option<Rc<Node>>> {
+        let mut arguments = Vec::new();
+
+        loop {
+            //  ) に到達するまで、解釈した値をargumentsベクタに追加する
+            match self.t.peek() {
+                Some(t) => match t {
+                    Token::Punctuator(c) => {
+                        if c == &')' {
+                            // ')'を消費する
+                            assert!(self.t.next().is_some());
+                            return arguments;
+                        }
+                        if c == &',' {
+                            // ','を消費する
+                            assert!(self.t.next().is_some());
+                        }
+                    }
+                    _ => arguments.push(self.assignment_expression()),
+                },
+                None => return arguments,
+            }
+        }
+    }
+
     fn member_expression(&mut self) -> Option<Rc<Node>> {
         self.primary_expression()
     }
