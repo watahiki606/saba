@@ -255,7 +255,26 @@ impl JsParser {
     }
 
     fn left_hand_side_expression(&mut self) -> Option<Rc<Node>> {
-        self.member_expression()
+        let expr = self.member_expression();
+
+        let t = match self.t.peek() {
+            Some(token) => token,
+            None => return expr,
+        };
+
+        match t {
+            Token::Punctuator(c) => {
+                if c == &'(' {
+                    // '('を消費する
+                    assert!(self.t.next().is_some());
+                    // 関数呼び出しのため、CallExpressionノードを返す
+                    return Node::new_call_expression(expr, self.arguments());
+                }
+
+                expr
+            }
+            _ => expr,
+        }
     }
 
     fn member_expression(&mut self) -> Option<Rc<Node>> {
