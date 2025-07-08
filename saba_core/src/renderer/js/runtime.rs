@@ -156,6 +156,7 @@ impl JsRuntime {
                 }
             }
             Node::StringLiteral(value) => Some(RuntimeValue::StringLiteral(value.to_string())),
+            _ => todo!(),
         }
     }
 }
