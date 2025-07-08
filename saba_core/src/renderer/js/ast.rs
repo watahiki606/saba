@@ -303,7 +303,24 @@ impl JsParser {
     }
 
     fn member_expression(&mut self) -> Option<Rc<Node>> {
-        self.primary_expression()
+        let expr = self.primary_expression();
+
+        let t = match self.t.peek() {
+            Some(token) => token,
+            None => return expr,
+        };
+
+        match t {
+            Token::Punctuator(c) => {
+                if c == &'.' {
+                    // '.'を消費する
+                    assert!(self.t.next().is_some());
+                    return Node::new_member_expression(expr, self.identifier());
+                }
+                expr
+            }
+            _ => expr,
+        }
     }
 
     fn primary_expression(&mut self) -> Option<Rc<Node>> {
