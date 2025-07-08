@@ -194,6 +194,11 @@ impl JsParser {
                     assert!(self.t.next().is_some());
 
                     self.variable_declaration()
+                } else if keyword == "return" {
+                    // 'return'の予約後を消費する
+                    assert!(self.t.next().is_some());
+
+                    Node::new_return_statement(self.assignment_expression())
                 } else {
                     None
                 }
