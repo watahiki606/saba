@@ -143,9 +143,22 @@ impl JsRuntime {
                 None
             }
             Node::MemberExpression { object, property } => {
-                // 後ほど実装
-                None
+                let object_value = match self.eval(object, env.clone()) {
+                    Some(value) => value,
+                    None => return None,
+                };
+                let property_value = match self.eval(property, env.clone()) {
+                    Some(value) => value,
+                    // プロパティが存在しないため、`object_value`をここで返す
+                    None => return Some(object_value),
+                };
+                // document.getElementById は "document.getElementById"という一つの文字列として扱う。
+                // このメソッドへの呼び出しは、"document.getElementById"という名前の関数への呼び出しになる
+                return Some(
+                    object_value + RuntimeValue::StringLiteral(".".to_string()) + property_value,
+                );
             }
+
             Node::NumericLiteral(value) => Some(RuntimeValue::Number(*value)),
             Node::VariableDeclaration { declarations } => {
                 for declaration in declarations {
