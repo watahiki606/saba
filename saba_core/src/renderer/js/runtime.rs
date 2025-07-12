@@ -217,6 +217,13 @@ impl JsRuntime {
                     None => return None,
                 };
 
+                // ブラウザAPIの呼び出しを試みる
+                let api_result = self.call_browser_api(&callee_value, &arguments, new_env.clone());
+                if api_result.0 {
+                    // もしブラウザAPIを呼び出していたら、ユーザーが定義した関数は実行しない
+                    return api_result.1;
+                }
+
                 // すでに定義されている関数を探す
                 let function = {
                     let mut f: Option<Function> = None;
