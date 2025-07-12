@@ -145,6 +145,27 @@ impl JsRuntime {
                         return None;
                     }
                 }
+
+                // もし左辺の値が DOM ツリーのノードを表す HtmlElement ならば、DOM ツリーを更新する
+                if let Some(RuntimeValue::HtmlElement { object, property }) =
+                    self.eval(left, env.clone())
+                {
+                    let right_value = match self.eval(right, env.clone()) {
+                        Some(value) => value,
+                        None => return None,
+                    };
+
+                    if let Some(p) = property {
+                        // target.textContent = "foobar"; のようにノードのテキストを更新する
+                        if p == "textContent" {
+                            object
+                                .borrow_mut()
+                                .set_first_child(Some(Rc::new(RefCell::new(DomNode::new(
+                                    DomNodeKind::Text(right_value.to_string()),
+                                )))));
+                        }
+                    }
+                }
                 None
             }
             Node::MemberExpression { object, property } => {
@@ -157,6 +178,15 @@ impl JsRuntime {
                     // プロパティが存在しないため、`object_value`をここで返す
                     None => return Some(object_value),
                 };
+                // もしオブジェクトがDOMノードの場合、HtmlElement の property を更新する
+                if let RuntimeValue::HtmlElement { object, property } = object_value {
+                    assert!(property.is_none());
+                    // HtmlElement の property に property_value の文字列をセットする
+                    return Some(RuntimeValue::HtmlElement {
+                        object,
+                        property: Some(property_value.to_string()),
+                    });
+                }
                 // document.getElementById は "document.getElementById"という一つの文字列として扱う。
                 // このメソッドへの呼び出しは、"document.getElementById"という名前の関数への呼び出しになる
                 return Some(
